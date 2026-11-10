@@ -159,6 +159,93 @@ describe('KPI Calculation Rules', () => {
     expect(kpis.blendedRoas).toBeNull();
     expect(kpis.spendPerOrder).toBeNull();
     expect(kpis.dataCoverage).toBe(0);
+    expect(kpis.totalTargetSpend).toBeNull();
+    expect(kpis.totalTargetRevenue).toBeNull();
+    expect(kpis.totalTargetOrders).toBeNull();
+    expect(kpis.spendAchievementPct).toBeNull();
+    expect(kpis.revenueAchievementPct).toBeNull();
+  });
+
+  it('calculates target metrics and achievement percentages correctly when target data exists', () => {
+    const mockRecords: AdsDailyRecord[] = [
+      {
+        id: '1',
+        reportDate: '2026-11-01',
+        timezone: 'Asia/Jakarta',
+        channel: 'Shopee',
+        adType: 'Shopee Ads',
+        periodStart: null,
+        periodEnd: null,
+        cutoff: null,
+        targetSpend: 6000000,
+        actualSpend: 7500000,
+        targetRevenue: 60000000,
+        actualRevenue: 72000000,
+        targetOrders: 200,
+        actualOrders: 250,
+        sourceRoas: 9.6,
+        status: 'verified',
+        rawStatus: 'Terverifikasi',
+        pic: 'Performance Ads',
+        issueNotes: null,
+        metricSource: null,
+        evidenceUrl: null,
+        pulledAt: null,
+      },
+      {
+        id: '2',
+        reportDate: '2026-11-01',
+        timezone: 'Asia/Jakarta',
+        channel: 'TikTok Shop',
+        adType: 'GMV Max',
+        periodStart: null,
+        periodEnd: null,
+        cutoff: null,
+        targetSpend: 4000000,
+        actualSpend: 2500000,
+        targetRevenue: 40000000,
+        actualRevenue: 28000000,
+        targetOrders: 100,
+        actualOrders: 80,
+        sourceRoas: 11.2,
+        status: 'verified',
+        rawStatus: 'Terverifikasi',
+        pic: 'Marketplace',
+        issueNotes: null,
+        metricSource: null,
+        evidenceUrl: null,
+        pulledAt: null,
+      },
+    ];
+
+    const kpis = calculateKpiMetrics(mockRecords);
+
+    // Targets:
+    // Total Target Spend = 6M + 4M = 10M
+    expect(kpis.totalTargetSpend).toBe(10000000);
+    // Total Target Revenue = 60M + 40M = 100M
+    expect(kpis.totalTargetRevenue).toBe(100000000);
+    // Total Target Orders = 200 + 100 = 300
+    expect(kpis.totalTargetOrders).toBe(300);
+
+    // Target Blended ROAS = 100M / 10M = 10.0
+    expect(kpis.targetBlendedRoas).toBe(10.0);
+
+    // Actuals:
+    // Total Actual Spend = 7.5M + 2.5M = 10M
+    expect(kpis.totalSpend).toBe(10000000);
+    // Total Actual Revenue = 72M + 28M = 100M
+    expect(kpis.totalRevenue).toBe(100000000);
+    // Total Actual Orders = 250 + 80 = 330
+    expect(kpis.totalOrders).toBe(330);
+
+    // Achievements:
+    // Spend: 10M / 10M = 100%
+    expect(kpis.spendAchievementPct).toBe(100);
+    // Revenue: 100M / 100M = 100%
+    expect(kpis.revenueAchievementPct).toBe(100);
+    // Orders: 330 / 300 = 110%
+    expect(kpis.ordersAchievementPct).toBeCloseTo(110, 1);
   });
 });
 

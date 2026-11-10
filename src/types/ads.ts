@@ -63,15 +63,36 @@ export interface KpiSummaryMetrics {
   unavailableCount: number;
   partialCount: number;
   pendingCount: number;
+
+  // Target metrics aggregated from spreadsheet
+  totalTargetSpend: number | null;
+  totalTargetRevenue: number | null;
+  totalTargetOrders: number | null;
+  targetBlendedRoas: number | null;
+  targetSpendPerOrder: number | null;
+  spendAchievementPct: number | null; // (actual / target) * 100
+  revenueAchievementPct: number | null; // (actual / target) * 100
+  ordersAchievementPct: number | null; // (actual / target) * 100
 }
 
 export interface ChannelAggregatedSummary {
   channel: string;
   adType: string;
   totalSpend: number | null;
+  totalTargetSpend: number | null;
+  spendAchievementPct: number | null;
+
   totalRevenue: number | null;
+  totalTargetRevenue: number | null;
+  revenueAchievementPct: number | null;
+
   totalOrders: number | null;
+  totalTargetOrders: number | null;
+  ordersAchievementPct: number | null;
+
   blendedRoas: number | null;
+  targetRoas: number | null;
+
   spendShare: number;
   revenueShare: number;
   totalDays: number;

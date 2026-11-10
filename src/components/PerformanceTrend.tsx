@@ -27,7 +27,11 @@ interface DailyAggregatedData {
   orders: number;
   roas: number;
   spendPerOrder: number;
+  targetSpend: number;
+  targetRevenue: number;
+  targetOrders: number;
   hasValid: boolean;
+  hasTarget: boolean;
 }
 
 export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) => {
@@ -37,11 +41,29 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
 
   // Group records by reportDate
   const dailyData: DailyAggregatedData[] = useMemo(() => {
-    const map = new Map<string, { spend: number; revenue: number; orders: number; hasValid: boolean }>();
+    const map = new Map<string, {
+      spend: number;
+      revenue: number;
+      orders: number;
+      targetSpend: number;
+      targetRevenue: number;
+      targetOrders: number;
+      hasValid: boolean;
+      hasTarget: boolean;
+    }>();
 
     for (const r of records) {
       if (!r.reportDate) continue;
-      const existing = map.get(r.reportDate) || { spend: 0, revenue: 0, orders: 0, hasValid: false };
+      const existing = map.get(r.reportDate) || {
+        spend: 0,
+        revenue: 0,
+        orders: 0,
+        targetSpend: 0,
+        targetRevenue: 0,
+        targetOrders: 0,
+        hasValid: false,
+        hasTarget: false,
+      };
 
       if (r.actualSpend !== null) {
         existing.spend += r.actualSpend;
@@ -56,6 +78,19 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
         existing.hasValid = true;
       }
 
+      if (r.targetSpend !== null) {
+        existing.targetSpend += r.targetSpend;
+        existing.hasTarget = true;
+      }
+      if (r.targetRevenue !== null) {
+        existing.targetRevenue += r.targetRevenue;
+        existing.hasTarget = true;
+      }
+      if (r.targetOrders !== null) {
+        existing.targetOrders += r.targetOrders;
+        existing.hasTarget = true;
+      }
+
       map.set(r.reportDate, existing);
     }
 
@@ -68,9 +103,13 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
           spend: data.hasValid ? data.spend : 0,
           revenue: data.hasValid ? data.revenue : 0,
           orders: data.hasValid ? data.orders : 0,
+          targetSpend: data.hasTarget ? data.targetSpend : 0,
+          targetRevenue: data.hasTarget ? data.targetRevenue : 0,
+          targetOrders: data.hasTarget ? data.targetOrders : 0,
           roas,
           spendPerOrder,
           hasValid: data.hasValid,
+          hasTarget: data.hasTarget,
         };
       })
       .sort((a, b) => a.date.localeCompare(b.date));
@@ -618,25 +657,52 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
                     ROAS {formatRoas(dailyData[hoveredIndex].roas)}
                   </span>
                 </div>
-                <div className="space-y-1 font-mono text-2xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">GMV Ads:</span>
-                    <strong className="text-white">
-                      {formatCurrencyIDR(dailyData[hoveredIndex].revenue)}
-                    </strong>
+                <div className="space-y-1.5 font-mono text-2xs">
+                  <div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">GMV Ads:</span>
+                      <strong className="text-white">
+                        {formatCurrencyIDR(dailyData[hoveredIndex].revenue)}
+                      </strong>
+                    </div>
+                    {dailyData[hoveredIndex].hasTarget && dailyData[hoveredIndex].targetRevenue > 0 && (
+                      <div className="flex justify-between text-sky-400 font-sans text-3xs">
+                        <span>Target: {formatCurrencyIDR(dailyData[hoveredIndex].targetRevenue)}</span>
+                        <span>{((dailyData[hoveredIndex].revenue / dailyData[hoveredIndex].targetRevenue) * 100).toFixed(0)}%</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Spend:</span>
-                    <strong className="text-amber-400">
-                      {formatCurrencyIDR(dailyData[hoveredIndex].spend)}
-                    </strong>
+
+                  <div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Spend:</span>
+                      <strong className="text-amber-400">
+                        {formatCurrencyIDR(dailyData[hoveredIndex].spend)}
+                      </strong>
+                    </div>
+                    {dailyData[hoveredIndex].hasTarget && dailyData[hoveredIndex].targetSpend > 0 && (
+                      <div className="flex justify-between text-amber-300 font-sans text-3xs">
+                        <span>Target: {formatCurrencyIDR(dailyData[hoveredIndex].targetSpend)}</span>
+                        <span>{((dailyData[hoveredIndex].spend / dailyData[hoveredIndex].targetSpend) * 100).toFixed(0)}%</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Paid Order:</span>
-                    <strong className="text-white">
-                      {formatNumber(dailyData[hoveredIndex].orders)}
-                    </strong>
+
+                  <div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Paid Order:</span>
+                      <strong className="text-white">
+                        {formatNumber(dailyData[hoveredIndex].orders)}
+                      </strong>
+                    </div>
+                    {dailyData[hoveredIndex].hasTarget && dailyData[hoveredIndex].targetOrders > 0 && (
+                      <div className="flex justify-between text-indigo-300 font-sans text-3xs">
+                        <span>Target: {formatNumber(dailyData[hoveredIndex].targetOrders)}</span>
+                        <span>{((dailyData[hoveredIndex].orders / dailyData[hoveredIndex].targetOrders) * 100).toFixed(0)}%</span>
+                      </div>
+                    )}
                   </div>
+
                   <div className="flex justify-between border-t border-slate-800 pt-1 mt-1">
                     <span className="text-slate-400">Spend / Order:</span>
                     <strong className="text-slate-300">

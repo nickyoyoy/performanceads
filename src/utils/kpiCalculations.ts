@@ -24,6 +24,14 @@ export function calculateKpiMetrics(records: AdsDailyRecord[]): KpiSummaryMetric
       unavailableCount: 0,
       partialCount: 0,
       pendingCount: 0,
+      totalTargetSpend: null,
+      totalTargetRevenue: null,
+      totalTargetOrders: null,
+      targetBlendedRoas: null,
+      targetSpendPerOrder: null,
+      spendAchievementPct: null,
+      revenueAchievementPct: null,
+      ordersAchievementPct: null,
     };
   }
 
@@ -35,6 +43,16 @@ export function calculateKpiMetrics(records: AdsDailyRecord[]): KpiSummaryMetric
 
   let totalOrdersSum = 0;
   let hasValidOrders = false;
+
+  // Target accumulators
+  let totalTargetSpendSum = 0;
+  let hasValidTargetSpend = false;
+
+  let totalTargetRevenueSum = 0;
+  let hasValidTargetRevenue = false;
+
+  let totalTargetOrdersSum = 0;
+  let hasValidTargetOrders = false;
 
   let validRecordsCount = 0;
   let verifiedCount = 0;
@@ -63,19 +81,40 @@ export function calculateKpiMetrics(records: AdsDailyRecord[]): KpiSummaryMetric
       validRecordsCount++;
     }
 
+    // Actual Spend
     if (record.actualSpend !== null && !isNaN(record.actualSpend)) {
       totalSpendSum += record.actualSpend;
       hasValidSpend = true;
     }
 
+    // Actual Revenue
     if (record.actualRevenue !== null && !isNaN(record.actualRevenue)) {
       totalRevenueSum += record.actualRevenue;
       hasValidRevenue = true;
     }
 
+    // Actual Orders
     if (record.actualOrders !== null && !isNaN(record.actualOrders)) {
       totalOrdersSum += record.actualOrders;
       hasValidOrders = true;
+    }
+
+    // Target Spend
+    if (record.targetSpend !== null && !isNaN(record.targetSpend)) {
+      totalTargetSpendSum += record.targetSpend;
+      hasValidTargetSpend = true;
+    }
+
+    // Target Revenue
+    if (record.targetRevenue !== null && !isNaN(record.targetRevenue)) {
+      totalTargetRevenueSum += record.targetRevenue;
+      hasValidTargetRevenue = true;
+    }
+
+    // Target Orders
+    if (record.targetOrders !== null && !isNaN(record.targetOrders)) {
+      totalTargetOrdersSum += record.targetOrders;
+      hasValidTargetOrders = true;
     }
   }
 
@@ -94,6 +133,34 @@ export function calculateKpiMetrics(records: AdsDailyRecord[]): KpiSummaryMetric
     spendPerOrder = totalSpendSum / totalOrdersSum;
   }
 
+  // Target Blended ROAS = totalTargetRevenue / totalTargetSpend
+  let targetBlendedRoas: number | null = null;
+  if (hasValidTargetRevenue && hasValidTargetSpend && totalTargetSpendSum > 0) {
+    targetBlendedRoas = totalTargetRevenueSum / totalTargetSpendSum;
+  }
+
+  // Target Spend per Order = totalTargetSpend / totalTargetOrders
+  let targetSpendPerOrder: number | null = null;
+  if (hasValidTargetSpend && hasValidTargetOrders && totalTargetOrdersSum > 0) {
+    targetSpendPerOrder = totalTargetSpendSum / totalTargetOrdersSum;
+  }
+
+  // Achievement Percentages (% Realisasi vs Target)
+  const spendAchievementPct =
+    hasValidSpend && hasValidTargetSpend && totalTargetSpendSum > 0
+      ? (totalSpendSum / totalTargetSpendSum) * 100
+      : null;
+
+  const revenueAchievementPct =
+    hasValidRevenue && hasValidTargetRevenue && totalTargetRevenueSum > 0
+      ? (totalRevenueSum / totalTargetRevenueSum) * 100
+      : null;
+
+  const ordersAchievementPct =
+    hasValidOrders && hasValidTargetOrders && totalTargetOrdersSum > 0
+      ? (totalOrdersSum / totalTargetOrdersSum) * 100
+      : null;
+
   return {
     totalSpend: hasValidSpend ? totalSpendSum : null,
     totalRevenue: hasValidRevenue ? totalRevenueSum : null,
@@ -107,6 +174,14 @@ export function calculateKpiMetrics(records: AdsDailyRecord[]): KpiSummaryMetric
     unavailableCount,
     partialCount,
     pendingCount,
+    totalTargetSpend: hasValidTargetSpend ? totalTargetSpendSum : null,
+    totalTargetRevenue: hasValidTargetRevenue ? totalTargetRevenueSum : null,
+    totalTargetOrders: hasValidTargetOrders ? totalTargetOrdersSum : null,
+    targetBlendedRoas,
+    targetSpendPerOrder,
+    spendAchievementPct,
+    revenueAchievementPct,
+    ordersAchievementPct,
   };
 }
 

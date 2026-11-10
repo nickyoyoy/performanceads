@@ -44,6 +44,16 @@ export function formatPercent(val: number | null | undefined): string {
   return `${Math.round(val * 100)}%`;
 }
 
+export function formatRatioPercent(val: number | null | undefined, decimals = 1): string {
+  if (val === null || val === undefined || isNaN(val)) {
+    return '—';
+  }
+  return `${new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(val)}%`;
+}
+
 export function formatDateWIB(dateStr: string | null | undefined): string {
   if (!dateStr || dateStr === 'N/A') return '—';
 

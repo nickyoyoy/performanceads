@@ -94,34 +94,119 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({ record, onClose }) =
 
           {/* Drawer Body */}
           <div className="p-6 space-y-6 flex-1 text-sm text-slate-700">
-            {/* Metric Overview Grid */}
+            {/* Metric Overview Grid: Realisasi vs Target */}
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
-                Realisasi Metrik
-              </h4>
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <div>
-                  <div className="text-2xs text-slate-500">Spend</div>
-                  <div className="text-base font-bold text-slate-900 font-mono tabular-nums">
+              <div className="flex items-center justify-between mb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Perbandingan Realisasi & Target Metrik
+                </h4>
+                <span className="text-2xs text-slate-400 font-mono">
+                  Sumber: Spreadsheet DB ADS
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+                {/* Spend */}
+                <div className="bg-white p-3 rounded-md border border-slate-200/80 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-2xs font-semibold uppercase text-slate-500">
+                    <span>Spend Iklan</span>
+                    {record.actualSpend !== null && record.targetSpend !== null && record.targetSpend > 0 && (
+                      <span className={`px-1.5 py-0.5 rounded text-3xs font-bold ${
+                        (record.actualSpend / record.targetSpend) > 1.05
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {((record.actualSpend / record.targetSpend) * 100).toFixed(0)}% budget
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-base font-bold text-slate-900 font-mono tabular-nums mt-1">
                     {formatCurrencyIDR(record.actualSpend)}
                   </div>
+                  <div className="text-2xs text-slate-500 font-mono mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-slate-400">Target:</span>
+                    <span className="font-semibold text-slate-700">
+                      {record.targetSpend !== null ? formatCurrencyIDR(record.targetSpend) : '—'}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-2xs text-slate-500">GMV Ads</div>
-                  <div className="text-base font-bold text-slate-900 font-mono tabular-nums">
+
+                {/* GMV Ads */}
+                <div className="bg-white p-3 rounded-md border border-slate-200/80 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-2xs font-semibold uppercase text-slate-500">
+                    <span>GMV Ads</span>
+                    {record.actualRevenue !== null && record.targetRevenue !== null && record.targetRevenue > 0 && (
+                      <span className={`px-1.5 py-0.5 rounded text-3xs font-bold ${
+                        (record.actualRevenue / record.targetRevenue) >= 1
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-blue-50 text-blue-700 border border-blue-200'
+                      }`}>
+                        {((record.actualRevenue / record.targetRevenue) * 100).toFixed(0)}% tercapai
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-base font-bold text-slate-900 font-mono tabular-nums mt-1">
                     {formatCurrencyIDR(record.actualRevenue)}
                   </div>
-                </div>
-                <div>
-                  <div className="text-2xs text-slate-500">Paid Order</div>
-                  <div className="text-base font-bold text-slate-900 font-mono tabular-nums">
-                    {formatNumber(record.actualOrders)}
+                  <div className="text-2xs text-slate-500 font-mono mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-slate-400">Target:</span>
+                    <span className="font-semibold text-slate-700">
+                      {record.targetRevenue !== null ? formatCurrencyIDR(record.targetRevenue) : '—'}
+                    </span>
                   </div>
                 </div>
-                <div>
-                  <div className="text-2xs text-slate-500">ROAS</div>
-                  <div className="text-base font-bold text-emerald-700 font-mono tabular-nums">
+
+                {/* Paid Order */}
+                <div className="bg-white p-3 rounded-md border border-slate-200/80 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-2xs font-semibold uppercase text-slate-500">
+                    <span>Paid Order</span>
+                    {record.actualOrders !== null && record.targetOrders !== null && record.targetOrders > 0 && (
+                      <span className={`px-1.5 py-0.5 rounded text-3xs font-bold ${
+                        (record.actualOrders / record.targetOrders) >= 1
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                      }`}>
+                        {((record.actualOrders / record.targetOrders) * 100).toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-base font-bold text-slate-900 font-mono tabular-nums mt-1">
+                    {formatNumber(record.actualOrders)}
+                  </div>
+                  <div className="text-2xs text-slate-500 font-mono mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-slate-400">Target:</span>
+                    <span className="font-semibold text-slate-700">
+                      {record.targetOrders !== null ? `${formatNumber(record.targetOrders)} order` : '—'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* ROAS */}
+                <div className="bg-white p-3 rounded-md border border-slate-200/80 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-2xs font-semibold uppercase text-slate-500">
+                    <span>Blended ROAS</span>
+                    {record.sourceRoas !== null && record.targetRevenue !== null && record.targetSpend !== null && record.targetSpend > 0 && (
+                      <span className={`px-1.5 py-0.5 rounded text-3xs font-bold ${
+                        record.sourceRoas >= (record.targetRevenue / record.targetSpend)
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {record.sourceRoas >= (record.targetRevenue / record.targetSpend) ? 'Tercapai' : 'Di bawah'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-base font-bold text-emerald-700 font-mono tabular-nums mt-1">
                     {formatRoas(record.sourceRoas)}
+                  </div>
+                  <div className="text-2xs text-slate-500 font-mono mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-slate-400">Target:</span>
+                    <span className="font-semibold text-slate-700">
+                      {
+                        record.targetRevenue !== null && record.targetSpend !== null && record.targetSpend > 0
+                          ? formatRoas(record.targetRevenue / record.targetSpend)
+                          : '—'
+                      }
+                    </span>
                   </div>
                 </div>
               </div>
