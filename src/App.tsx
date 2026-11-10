@@ -14,11 +14,17 @@ import { DetailDrawer } from './components/DetailDrawer';
 import { DataHealthSection } from './components/DataHealthSection';
 import { LoadingView, ErrorView, EmptyFilterView } from './components/StateViews';
 import { formatDateWIB } from './utils/formatters';
+import { LayoutDashboard, TrendingUp, Activity, AlertTriangle } from 'lucide-react';
+
+export type MainTab = 'overview' | 'analytics' | 'health';
 
 // Initialize data source instance once outside component render
 const adsDataSource = new GoogleSheetsAdsDataSource('/api/sheets-csv');
 
 export const App: React.FC = () => {
+  // Active primary tab: 'overview' | 'analytics' | 'health'
+  const [activeTab, setActiveTab] = useState<MainTab>('overview');
+
   // Read initial filters from URL query parameters if available, defaulting to 30d
   const [filters, setFilters] = useState<AdsFilters>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -93,6 +99,14 @@ export const App: React.FC = () => {
     return calculateKpiMetrics(fetchResult?.records || []);
   }, [fetchResult]);
 
+  // Issue count for Data Health tab notification
+  const issueSourcesCount = useMemo(() => {
+    if (!fetchResult) return 0;
+    return fetchResult.records.filter(
+      r => r.status === 'authentication_required' || r.status === 'unavailable' || r.status === 'api_error'
+    ).length;
+  }, [fetchResult]);
+
   // Human-readable active date range text
   const activeDateRangeText = useMemo(() => {
     if (!fetchResult || fetchResult.records.length === 0) return 'Tidak ada data';
@@ -114,13 +128,12 @@ export const App: React.FC = () => {
     });
   };
 
-  const handleScrollToHealth = () => {
-    const el = document.getElementById('data-health');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      el.classList.add('ring-2', 'ring-blue-500');
-      setTimeout(() => el.classList.remove('ring-2', 'ring-blue-500'), 2000);
-    }
+  const handleNavigateToHealth = () => {
+    setActiveTab('health');
+    setTimeout(() => {
+      const el = document.getElementById('data-health');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   };
 
   return (
@@ -137,6 +150,59 @@ export const App: React.FC = () => {
         availableDates={fetchResult?.availableDates || []}
         activeDateRangeText={activeDateRangeText}
       />
+
+      {/* Primary Section Navigation Tabs */}
+      <nav
+        aria-label="Navigasi Bagian Dashboard"
+        className="bg-white border-b border-slate-200 sticky top-[95px] md:top-[85px] z-10 shadow-2xs"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('overview')}
+            className={`inline-flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'overview'
+                ? 'border-blue-600 text-blue-700 bg-blue-50/40'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>Ringkasan Eksekutif</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('analytics')}
+            className={`inline-flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'analytics'
+                ? 'border-blue-600 text-blue-700 bg-blue-50/40'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span>Tren & Rincian Kanal</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('health')}
+            className={`inline-flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'health'
+                ? 'border-blue-600 text-blue-700 bg-blue-50/40'
+                : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>Data Health & Integrasi</span>
+            {issueSourcesCount > 0 && (
+              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 text-2xs font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                <span>{issueSourcesCount} Isu</span>
+              </span>
+            )}
+          </button>
+        </div>
+      </nav>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Loading State */}
@@ -156,38 +222,76 @@ export const App: React.FC = () => {
               sourceUrl={fetchResult.sourceUrl}
             />
 
-            {/* Data Quality Banner (if data coverage < 100%) */}
-            <DataQualityBanner
-              validCount={kpiMetrics.validRecordsCount}
-              totalCount={kpiMetrics.totalExpectedRecordsCount}
-              onScrollToHealth={handleScrollToHealth}
-            />
-
-            {/* Attribution Notice */}
-            <AttributionNotice />
-
-            {/* 6 Metric KPI Summary */}
-            <KpiSummary metrics={kpiMetrics} />
-
             {/* Empty State when filters yield 0 records */}
             {fetchResult.records.length === 0 ? (
               <EmptyFilterView onReset={handleResetFilters} />
             ) : (
               <>
-                {/* Performance Trend Area (Multi-day interactive bar chart or single-day honest state) */}
-                <PerformanceTrend records={fetchResult.records} />
+                {/* ======================================================== */}
+                {/* TAB 1: RINGKASAN EKSEKUTIF (OVERVIEW)                     */}
+                {/* ======================================================== */}
+                {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Data Quality Banner (if data coverage < 100%) */}
+                    <DataQualityBanner
+                      validCount={kpiMetrics.validRecordsCount}
+                      totalCount={kpiMetrics.totalExpectedRecordsCount}
+                      onScrollToHealth={handleNavigateToHealth}
+                    />
 
-                {/* Channel Performance Table (Aggregated or Daily view) */}
-                <ChannelTable
-                  records={fetchResult.records}
-                  onSelectRecord={setSelectedRecord}
-                />
+                    {/* Attribution Notice */}
+                    <AttributionNotice />
 
-                {/* Data Health & Integration Diagnostic Section */}
-                <DataHealthSection
-                  records={fetchResult.records}
-                  onSelectRecord={setSelectedRecord}
-                />
+                    {/* 6 Metric KPI Summary */}
+                    <KpiSummary metrics={kpiMetrics} />
+
+                    {/* Executive Trend Summary */}
+                    <PerformanceTrend records={fetchResult.records} />
+
+                    {/* Channel Summary Table (Executive Mode) */}
+                    <ChannelTable
+                      records={fetchResult.records}
+                      onSelectRecord={setSelectedRecord}
+                    />
+                  </div>
+                )}
+
+                {/* ======================================================== */}
+                {/* TAB 2: TREN & RINCIAN KANAL (ANALYTICS DEEP DIVE)        */}
+                {/* ======================================================== */}
+                {activeTab === 'analytics' && (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50/60 border border-blue-200 rounded-lg p-3 text-xs text-blue-900">
+                      <strong>Analisis Mendalam:</strong> Silakan telaah dinamika pergerakan belanja iklan, pendapatan GMV, serta fluktuasi ROAS harian lintas kanal. Anda dapat beralih antara grafik terpadu dan memeriksa tabel rincian harian hingga per tanggal.
+                    </div>
+
+                    {/* Full Interactive Multi-Metric Chart */}
+                    <PerformanceTrend records={fetchResult.records} />
+
+                    {/* Channel Performance Table */}
+                    <ChannelTable
+                      records={fetchResult.records}
+                      onSelectRecord={setSelectedRecord}
+                    />
+                  </div>
+                )}
+
+                {/* ======================================================== */}
+                {/* TAB 3: DATA HEALTH & INTEGRASI (OPERATIONAL DIAGNOSTIC)    */}
+                {/* ======================================================== */}
+                {activeTab === 'health' && (
+                  <div className="space-y-6">
+                    <div className="bg-amber-50/70 border border-amber-200 rounded-lg p-3.5 text-xs text-amber-950">
+                      <strong>Pusat Pemantauan Operasional (PIC & Data Integrator):</strong> Halaman ini memuat status otentikasi API resmi, sesi login Seller Center (kebutuhan OTP), serta kendala Ads Manager Meta CPAS untuk ditindaklanjuti PIC terkait.
+                    </div>
+
+                    {/* Operational Diagnostic Section */}
+                    <DataHealthSection
+                      records={fetchResult.records}
+                      onSelectRecord={setSelectedRecord}
+                    />
+                  </div>
+                )}
               </>
             )}
           </>

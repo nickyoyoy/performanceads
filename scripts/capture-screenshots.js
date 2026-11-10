@@ -37,11 +37,11 @@ async function run() {
 
   const browser = await chromium.launch({ headless: true });
 
-  console.log('Starting Playwright screenshot captures...');
+  console.log('Starting Playwright screenshot captures for new tabbed interface...');
 
-  // 1. Desktop 1920x1080
+  // 1. Tab 1: Ringkasan Eksekutif (Desktop 1920x1080)
   {
-    console.log('Capturing Desktop 1920x1080...');
+    console.log('Capturing Tab 1: Ringkasan Eksekutif...');
     const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
     const page = await context.newPage();
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
@@ -50,20 +50,38 @@ async function run() {
     await context.close();
   }
 
-  // 2. Laptop 1366x768
+  // 2. Tab 2: Tren & Rincian Kanal
   {
-    console.log('Capturing Laptop 1366x768...');
+    console.log('Capturing Tab 2: Tren & Rincian Kanal...');
     const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
     const page = await context.newPage();
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
+    const analyticsTab = page.locator('button:has-text("Tren & Rincian Kanal")');
+    await analyticsTab.click();
+    await page.waitForTimeout(800);
+    await saveScreenshot(page, 'tab-analytics.png', { fullPage: false });
     await saveScreenshot(page, 'laptop-1366x768.png', { fullPage: false });
     await context.close();
   }
 
-  // 3. Mobile 390px (iPhone 13 viewport)
+  // 3. Tab 3: Data Health & Integrasi
   {
-    console.log('Capturing Mobile 390px...');
+    console.log('Capturing Tab 3: Data Health & Integrasi...');
+    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    const page = await context.newPage();
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    const healthTab = page.locator('button:has-text("Data Health & Integrasi")');
+    await healthTab.click();
+    await page.waitForTimeout(800);
+    await saveScreenshot(page, 'data-health.png', { fullPage: false });
+    await context.close();
+  }
+
+  // 4. Mobile 390px
+  {
+    console.log('Capturing Mobile 390px with Tabs...');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
     const page = await context.newPage();
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
@@ -72,47 +90,7 @@ async function run() {
     await context.close();
   }
 
-  // 4. Loading State
-  {
-    console.log('Capturing Loading State...');
-    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
-    const page = await context.newPage();
-    await page.route('**/api/sheets-csv', () => {
-      // Intentionally hang response to capture loading spinner
-    });
-    await page.goto(serverUrl, { waitUntil: 'commit' });
-    await page.waitForSelector('[role="status"]');
-    await page.waitForTimeout(600);
-    await saveScreenshot(page, 'loading-state.png');
-    await context.close();
-  }
-
-  // 5. Fetch Error / Fallback State
-  {
-    console.log('Capturing Fetch Fallback State...');
-    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
-    const page = await context.newPage();
-    // Simulate network disconnect so fallback fixture engages
-    await page.route('**/api/sheets-csv', route => route.abort());
-    await page.route('https://docs.google.com/**', route => route.abort());
-    await page.goto(serverUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    await saveScreenshot(page, 'fetch-error-state.png');
-    await context.close();
-  }
-
-  // 6. Partial Data State
-  {
-    console.log('Capturing Partial Data State...');
-    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
-    const page = await context.newPage();
-    await page.goto(serverUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    await saveScreenshot(page, 'partial-data-state.png');
-    await context.close();
-  }
-
-  // 7. Detail Drawer
+  // 5. Detail Drawer
   {
     console.log('Capturing Detail Drawer...');
     const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
@@ -126,24 +104,10 @@ async function run() {
     await context.close();
   }
 
-  // 8. Data Health section
-  {
-    console.log('Capturing Data Health section...');
-    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
-    const page = await context.newPage();
-    await page.goto(serverUrl, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1000);
-    const healthSection = page.locator('#data-health');
-    await healthSection.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(600);
-    await saveScreenshot(page, 'data-health.png');
-    await context.close();
-  }
-
   console.log('Closing browser and server...');
   await browser.close();
   await viteServer.close();
-  console.log('Finished capturing all screenshots successfully!');
+  console.log('Finished capturing all tabbed screenshots successfully!');
 }
 
 run().catch(err => {
