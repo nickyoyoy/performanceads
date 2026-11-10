@@ -1,6 +1,6 @@
 import React from 'react';
-import { AdsFilters } from '../types/ads';
-import { RefreshCw, RotateCcw } from 'lucide-react';
+import { AdsFilters, DatePreset } from '../types/ads';
+import { RefreshCw, RotateCcw, Calendar } from 'lucide-react';
 import { formatDateWIB } from '../utils/formatters';
 
 interface HeaderProps {
@@ -11,6 +11,8 @@ interface HeaderProps {
   isRefreshing: boolean;
   onRefresh: () => void;
   availableChannels: string[];
+  availableDates: string[];
+  activeDateRangeText: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,11 +23,13 @@ export const Header: React.FC<HeaderProps> = ({
   isRefreshing,
   onRefresh,
   availableChannels,
+  availableDates,
+  activeDateRangeText,
 }) => {
   const isFilterActive =
     (filters.channel && filters.channel !== 'all') ||
     (filters.status && filters.status !== 'all') ||
-    Boolean(filters.startDate && filters.startDate !== '2026-11-09');
+    (filters.datePreset && filters.datePreset !== '30d');
 
   const handleChannelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFilterChange({ ...filters, channel: e.target.value });
@@ -35,13 +39,14 @@ export const Header: React.FC<HeaderProps> = ({
     onFilterChange({ ...filters, status: e.target.value });
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    if (val === 'all_30') {
-      onFilterChange({ ...filters, startDate: '2026-10-11', endDate: '2026-11-09' });
-    } else {
-      onFilterChange({ ...filters, startDate: val, endDate: val });
-    }
+  const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value as DatePreset;
+    onFilterChange({
+      ...filters,
+      datePreset: val,
+      startDate: undefined,
+      endDate: undefined,
+    });
   };
 
   return (
@@ -59,8 +64,14 @@ export const Header: React.FC<HeaderProps> = ({
                   Ads Performance
                 </h1>
                 <span className="px-2 py-0.5 text-2xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 rounded">
-                  Prototype MVP
+                  Live Sync
                 </span>
+                {availableDates.length > 1 && (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                    <Calendar className="w-3 h-3" />
+                    {availableDates.length} Hari Terkumpul
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 Monitoring performa iklan dan ketersediaan data per kanal — ScentPlus
@@ -95,20 +106,29 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Periode filter */}
             <div className="flex items-center gap-1.5 text-xs text-slate-600">
-              <label htmlFor="filter-date" className="font-medium text-slate-700">
+              <label htmlFor="filter-date-preset" className="font-medium text-slate-700">
                 Periode:
               </label>
               <select
-                id="filter-date"
-                value={filters.startDate || '2026-11-09'}
-                onChange={handleDateChange}
-                className="bg-slate-50 border border-slate-300 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                id="filter-date-preset"
+                value={filters.datePreset || '30d'}
+                onChange={handlePresetChange}
+                className="bg-slate-50 border border-slate-300 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-medium"
               >
-                <option value="2026-11-09">9 November 2026 (Aktif)</option>
-                <option value="all_30" disabled title="Menunggu injeksi data 30-hari dari AI Agent">
-                  30 Hari Terakhir (Siap Digunakan)
-                </option>
+                <option value="30d">30 Hari Terakhir (Default)</option>
+                <option value="all">Semua Data ({availableDates.length} Hari, 1 Okt - 10 Nov)</option>
+                <option value="7d">7 Hari Terakhir</option>
+                <option value="mtd">November 2026 (MTD)</option>
+                <option value="prev_month">Oktober 2026 (31 Hari Penuh)</option>
+                <option value="2026-11-09">9 November 2026 (Data Awal)</option>
+                <option value="2026-11-10">10 November 2026 (Hari Ini - Parsial)</option>
               </select>
+            </div>
+
+            {/* Active Range Pill */}
+            <div className="hidden lg:flex items-center gap-1.5 text-2xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-mono">
+              <span>Jangkauan:</span>
+              <strong className="text-slate-900">{activeDateRangeText}</strong>
             </div>
 
             {/* Kanal filter */}
@@ -144,10 +164,9 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <option value="all">Semua Status</option>
                 <option value="verified">Terverifikasi (Verified)</option>
+                <option value="partial">Sebagian (Partial)</option>
                 <option value="authentication_required">Autentikasi Diperlukan</option>
                 <option value="unavailable">Tidak Tersedia</option>
-                <option value="partial">Sebagian (Partial)</option>
-                <option value="pending">Menunggu (Pending)</option>
               </select>
             </div>
           </div>
@@ -168,4 +187,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

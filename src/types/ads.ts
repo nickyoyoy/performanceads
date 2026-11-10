@@ -40,7 +40,10 @@ export interface AdsDailyRecord {
   pulledAt: string | null;
 }
 
+export type DatePreset = '30d' | 'all' | '7d' | 'mtd' | 'prev_month' | '2026-11-09' | '2026-11-10' | 'custom';
+
 export interface AdsFilters {
+  datePreset?: DatePreset;
   startDate?: string;
   endDate?: string;
   channel?: string;
@@ -62,10 +65,28 @@ export interface KpiSummaryMetrics {
   pendingCount: number;
 }
 
-export interface DataSourceResult {
-  records: AdsDailyRecord[];
-  isFallback: boolean;
-  lastFetchedAt: string; // ISO or formatted
-  rawRowCount: number;
+export interface ChannelAggregatedSummary {
+  channel: string;
+  adType: string;
+  totalSpend: number | null;
+  totalRevenue: number | null;
+  totalOrders: number | null;
+  blendedRoas: number | null;
+  totalDays: number;
+  verifiedDays: number;
+  partialDays: number;
+  issueDays: number;
+  pic: string | null;
+  latestStatus: AdsDataStatus;
+  latestPull: string | null;
+  latestNotes: string | null;
 }
 
+export interface DataSourceResult {
+  records: AdsDailyRecord[];
+  allRecords: AdsDailyRecord[];
+  availableDates: string[];
+  isFallback: boolean;
+  lastFetchedAt: string;
+  rawRowCount: number;
+}

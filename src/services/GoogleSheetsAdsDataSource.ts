@@ -15,7 +15,7 @@ export class GoogleSheetsAdsDataSource implements AdsDataSource {
 
   /**
    * Fetches CSV from Google Sheets via Vite dev proxy or direct URL.
-   * Falls back to local fixture if offline or fetch fails, explicitly setting isFallback.
+   * Uses strict cache-busting timestamps to always retrieve live data.
    */
   async getDailyPerformance(filters?: AdsFilters): Promise<AdsFetchResult> {
     let csvData: string | null = null;
@@ -23,14 +23,24 @@ export class GoogleSheetsAdsDataSource implements AdsDataSource {
     let usedUrl = '';
     let errorMessage: string | undefined;
 
+    const cacheBuster = `_t=${Date.now()}`;
+
     // 1. Attempt dev proxy if configured
     if (this.customProxyUrl) {
       try {
+        const proxyUrlWithParam = this.customProxyUrl.includes('?')
+          ? `${this.customProxyUrl}&${cacheBuster}`
+          : `${this.customProxyUrl}?${cacheBuster}`;
+
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
-        const res = await fetch(this.customProxyUrl, {
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch(proxyUrlWithParam, {
           signal: controller.signal,
-          headers: { Accept: 'text/csv, text/plain, */*' },
+          headers: {
+            Accept: 'text/csv, text/plain, */*',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
         });
         clearTimeout(timeoutId);
 
@@ -42,19 +52,22 @@ export class GoogleSheetsAdsDataSource implements AdsDataSource {
           }
         }
       } catch (err: unknown) {
-        // Proxy attempt failed, will try direct next
-        console.warn('Vite proxy fetch failed or not active, falling back to direct URL or fixture:', err);
+        console.warn('Vite proxy fetch failed or not active, trying direct URL:', err);
       }
     }
 
     // 2. If proxy didn't work, attempt direct fetch from Google Sheets
     if (!csvData) {
       try {
+        const directUrlWithParam = `${GOOGLE_SHEET_CSV_URL}&${cacheBuster}`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch(GOOGLE_SHEET_CSV_URL, {
+        const timeoutId = setTimeout(() => controller.abort(), 9000);
+        const res = await fetch(directUrlWithParam, {
           signal: controller.signal,
-          headers: { Accept: 'text/csv, text/plain, */*' },
+          headers: {
+            Accept: 'text/csv, text/plain, */*',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+          },
         });
         clearTimeout(timeoutId);
 
@@ -82,11 +95,22 @@ export class GoogleSheetsAdsDataSource implements AdsDataSource {
     // 4. Parse CSV records
     const allRecords = parseAdsCsv(csvData);
 
+    // Extract sorted unique dates from allRecords
+    const dateSet = new Set<string>();
+    allRecords.forEach(r => {
+      if (r.reportDate && /^\d{4}-\d{2}-\d{2}$/.test(r.reportDate)) {
+        dateSet.add(r.reportDate);
+      }
+    });
+    const availableDates = Array.from(dateSet).sort((a, b) => a.localeCompare(b));
+
     // 5. Apply filters
-    const filteredRecords = this.applyFilters(allRecords, filters);
+    const filteredRecords = this.applyFilters(allRecords, availableDates, filters);
 
     return {
       records: filteredRecords,
+      allRecords,
+      availableDates,
       isFallback,
       sourceUrl: usedUrl,
       fetchedAt: new Date(),
@@ -95,24 +119,71 @@ export class GoogleSheetsAdsDataSource implements AdsDataSource {
     };
   }
 
-  private applyFilters(records: AdsDailyRecord[], filters?: AdsFilters): AdsDailyRecord[] {
-    if (!filters) return records;
+  private applyFilters(
+    allRecords: AdsDailyRecord[],
+    availableDates: string[],
+    filters?: AdsFilters
+  ): AdsDailyRecord[] {
+    if (!filters) return allRecords;
 
-    return records.filter(record => {
-      // Date filter
-      if (filters.startDate && record.reportDate < filters.startDate) {
+    let targetStartDate = filters.startDate;
+    let targetEndDate = filters.endDate;
+
+    // Resolve date presets if specified
+    if (filters.datePreset) {
+      if (filters.datePreset === 'all') {
+        targetStartDate = undefined;
+        targetEndDate = undefined;
+      } else if (filters.datePreset === '30d') {
+        // Last 30 dates in availableDates
+        if (availableDates.length > 0) {
+          const slice30 = availableDates.slice(-30);
+          targetStartDate = slice30[0];
+          targetEndDate = slice30[slice30.length - 1];
+        }
+      } else if (filters.datePreset === '7d') {
+        // Last 7 dates
+        if (availableDates.length > 0) {
+          const slice7 = availableDates.slice(-7);
+          targetStartDate = slice7[0];
+          targetEndDate = slice7[slice7.length - 1];
+        }
+      } else if (filters.datePreset === 'mtd') {
+        // Current month (November 2026)
+        targetStartDate = '2026-11-01';
+        targetEndDate = '2026-11-30';
+      } else if (filters.datePreset === 'prev_month') {
+        // Previous month (October 2026)
+        targetStartDate = '2026-10-01';
+        targetEndDate = '2026-10-31';
+      } else if (filters.datePreset === '2026-11-09') {
+        targetStartDate = '2026-11-09';
+        targetEndDate = '2026-11-09';
+      } else if (filters.datePreset === '2026-11-10') {
+        targetStartDate = '2026-11-10';
+        targetEndDate = '2026-11-10';
+      }
+    }
+
+    return allRecords.filter(record => {
+      // Date filtering
+      if (targetStartDate && record.reportDate < targetStartDate) {
         return false;
       }
-      if (filters.endDate && record.reportDate > filters.endDate) {
+      if (targetEndDate && record.reportDate > targetEndDate) {
         return false;
       }
 
-      // Channel filter
-      if (filters.channel && filters.channel !== 'all' && record.channel.toLowerCase() !== filters.channel.toLowerCase()) {
+      // Channel filtering
+      if (
+        filters.channel &&
+        filters.channel !== 'all' &&
+        record.channel.toLowerCase() !== filters.channel.toLowerCase()
+      ) {
         return false;
       }
 
-      // Status filter
+      // Status filtering
       if (filters.status && filters.status !== 'all' && record.status !== filters.status) {
         return false;
       }
@@ -121,4 +192,3 @@ export class GoogleSheetsAdsDataSource implements AdsDataSource {
     });
   }
 }
-
