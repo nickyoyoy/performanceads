@@ -72,6 +72,8 @@ export interface ChannelAggregatedSummary {
   totalRevenue: number | null;
   totalOrders: number | null;
   blendedRoas: number | null;
+  spendShare: number;
+  revenueShare: number;
   totalDays: number;
   verifiedDays: number;
   partialDays: number;

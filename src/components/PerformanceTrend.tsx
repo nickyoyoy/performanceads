@@ -193,63 +193,63 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
       {highlights && distinctDatesCount >= 2 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {/* Best ROAS Day */}
-          <div className="bg-white border border-emerald-200/80 rounded-lg p-3.5 shadow-2xs">
+          <div className="bg-white border border-emerald-200/80 rounded-lg p-3.5 shadow-2xs overflow-hidden min-w-0">
             <div className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-emerald-800">
-              <Award className="w-3.5 h-3.5 text-emerald-600" />
-              <span>ROAS Tertinggi</span>
+              <Award className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+              <span className="truncate">ROAS Tertinggi</span>
             </div>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-xl font-bold font-mono text-emerald-700">
+            <div className="mt-1 flex items-baseline gap-1.5 truncate">
+              <span className="text-lg sm:text-xl font-bold font-mono text-emerald-700">
                 {formatRoas(highlights.peakRoasDay.roas)}
               </span>
-              <span className="text-xs text-slate-500 font-mono">
+              <span className="text-2xs text-slate-500 font-mono truncate">
                 ({formatDateWIB(highlights.peakRoasDay.date)})
               </span>
             </div>
-            <div className="text-2xs text-slate-500 mt-0.5">
+            <div className="text-2xs text-slate-500 mt-0.5 truncate">
               GMV {formatCurrencyIDR(highlights.peakRoasDay.revenue)} &bull; Spend {formatCurrencyIDR(highlights.peakRoasDay.spend)}
             </div>
           </div>
 
           {/* Peak GMV Day */}
-          <div className="bg-white border border-blue-200/80 rounded-lg p-3.5 shadow-2xs">
+          <div className="bg-white border border-blue-200/80 rounded-lg p-3.5 shadow-2xs overflow-hidden min-w-0">
             <div className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-blue-800">
-              <Zap className="w-3.5 h-3.5 text-blue-600" />
-              <span>Peak GMV Ads</span>
+              <Zap className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <span className="truncate">Peak GMV Ads</span>
             </div>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-xl font-bold font-mono text-blue-900">
+            <div className="mt-1 flex items-baseline gap-1.5 truncate">
+              <span className="text-lg sm:text-xl font-bold font-mono text-blue-900 truncate">
                 {formatCurrencyIDR(highlights.peakGmvDay.revenue)}
               </span>
             </div>
-            <div className="text-2xs text-slate-500 mt-0.5">
+            <div className="text-2xs text-slate-500 mt-0.5 truncate">
               {formatDateWIB(highlights.peakGmvDay.date)} &bull; {formatNumber(highlights.peakGmvDay.orders)} order
             </div>
           </div>
 
           {/* Average Daily Spend */}
-          <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs">
-            <div className="text-2xs font-bold uppercase tracking-wider text-slate-500">
+          <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs overflow-hidden min-w-0">
+            <div className="text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
               Rata-rata Spend / Hari
             </div>
-            <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+            <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 mt-1 truncate">
               {formatCurrencyIDR(highlights.avgSpend)}
             </div>
-            <div className="text-2xs text-slate-500 mt-0.5">
+            <div className="text-2xs text-slate-500 mt-0.5 truncate">
               Total {formatCurrencyIDR(highlights.totalSpend)} ({highlights.validDays} hari aktif)
             </div>
           </div>
 
           {/* Average Daily GMV */}
-          <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs">
-            <div className="text-2xs font-bold uppercase tracking-wider text-slate-500">
+          <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-2xs overflow-hidden min-w-0">
+            <div className="text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
               Rata-rata GMV / Hari
             </div>
-            <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+            <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 mt-1 truncate">
               {formatCurrencyIDR(highlights.avgRevenue)}
             </div>
-            <div className="text-2xs text-slate-500 mt-0.5">
-              Blended ROAS periode: <strong className="text-emerald-700">{formatRoas(highlights.blendedRoas)}</strong>
+            <div className="text-2xs text-slate-500 mt-0.5 truncate">
+              Blended ROAS: <strong className="text-emerald-700">{formatRoas(highlights.blendedRoas)}</strong>
             </div>
           </div>
         </div>

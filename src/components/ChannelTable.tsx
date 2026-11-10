@@ -83,8 +83,14 @@ export const ChannelTable: React.FC<ChannelTableProps> = ({
       map.set(key, cur);
     }
 
+    const totalPeriodSpend = Array.from(map.values()).reduce((acc, cur) => acc + (cur.hasSpend ? cur.spend : 0), 0);
+    const totalPeriodRevenue = Array.from(map.values()).reduce((acc, cur) => acc + (cur.hasRevenue ? cur.revenue : 0), 0);
+
     return Array.from(map.values()).map(item => {
       const blendedRoas = item.hasSpend && item.spend > 0 ? item.revenue / item.spend : null;
+      const spendShare = totalPeriodSpend > 0 && item.hasSpend ? (item.spend / totalPeriodSpend) * 100 : 0;
+      const revenueShare = totalPeriodRevenue > 0 && item.hasRevenue ? (item.revenue / totalPeriodRevenue) * 100 : 0;
+
       return {
         channel: item.channel,
         adType: item.adType,
@@ -92,6 +98,8 @@ export const ChannelTable: React.FC<ChannelTableProps> = ({
         totalRevenue: item.hasRevenue ? item.revenue : null,
         totalOrders: item.hasOrders ? item.orders : null,
         blendedRoas,
+        spendShare,
+        revenueShare,
         totalDays: item.totalDays,
         verifiedDays: item.verifiedDays,
         partialDays: item.partialDays,
@@ -210,7 +218,12 @@ export const ChannelTable: React.FC<ChannelTableProps> = ({
                     {/* Total Spend */}
                     <td className="px-4 py-3.5 whitespace-nowrap text-right font-mono tabular-nums text-slate-900 font-medium">
                       {item.totalSpend !== null ? (
-                        formatCurrencyIDR(item.totalSpend)
+                        <div>
+                          <div>{formatCurrencyIDR(item.totalSpend)}</div>
+                          <div className="text-3xs text-slate-400 font-sans font-normal">
+                            {item.spendShare.toFixed(1)}% porsi
+                          </div>
+                        </div>
                       ) : (
                         <span className="text-slate-400 font-sans">—</span>
                       )}
@@ -219,7 +232,12 @@ export const ChannelTable: React.FC<ChannelTableProps> = ({
                     {/* Total GMV */}
                     <td className="px-4 py-3.5 whitespace-nowrap text-right font-mono tabular-nums text-slate-900 font-bold">
                       {item.totalRevenue !== null ? (
-                        formatCurrencyIDR(item.totalRevenue)
+                        <div>
+                          <div>{formatCurrencyIDR(item.totalRevenue)}</div>
+                          <div className="text-3xs text-blue-600 font-sans font-semibold">
+                            {item.revenueShare.toFixed(1)}% porsi
+                          </div>
+                        </div>
                       ) : (
                         <span className="text-slate-400 font-sans font-normal">—</span>
                       )}

@@ -18,7 +18,6 @@ interface KpiCardItem {
   value: string;
   subtitle: string;
   tooltip: string;
-  isCoverage?: boolean;
   hasWarning?: boolean;
 }
 
@@ -27,12 +26,13 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics }) => {
 
   const isPartial = metrics.validRecordsCount < metrics.totalExpectedRecordsCount && metrics.totalExpectedRecordsCount > 0;
 
+  // Grouped logically: Row 1 = Financials (Spend, GMV, ROAS); Row 2 = Volume & Operations (Orders, CPO, Coverage)
   const cards: KpiCardItem[] = [
     {
       id: 'spend',
       label: 'Total Spend',
       value: formatCurrencyIDR(metrics.totalSpend),
-      subtitle: isPartial ? `Dari ${metrics.validRecordsCount} kanal aktif` : 'Total belanja iklan',
+      subtitle: isPartial ? 'Belanja iklan terverifikasi' : 'Total biaya iklan',
       tooltip: 'Akumulasi pengeluaran iklan aktual dari kanal dengan status terverifikasi. Tidak menghitung kanal bermasalah sebagai Rp 0.',
       hasWarning: isPartial,
     },
@@ -40,60 +40,61 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics }) => {
       id: 'gmv',
       label: 'GMV Ads',
       value: formatCurrencyIDR(metrics.totalRevenue),
-      subtitle: isPartial ? 'Broad attribution (Shopee)' : 'Gross Merchandise Value',
+      subtitle: 'Gross Merchandise Value',
       tooltip: 'Realisasi pendapatan penjualan kotor yang diatribusikan ke iklan berbayar sesuai model atribusi platform masing-masing.',
-      hasWarning: isPartial,
-    },
-    {
-      id: 'orders',
-      label: 'Paid Orders',
-      value: formatNumber(metrics.totalOrders),
-      subtitle: isPartial ? `${metrics.validRecordsCount} kanal tersedia` : 'Total pesanan iklan',
-      tooltip: 'Total volume pesanan berbayar yang dihasilkan langsung melalui kampanye iklan berbayar.',
       hasWarning: isPartial,
     },
     {
       id: 'roas',
       label: 'Blended ROAS',
       value: formatRoas(metrics.blendedRoas),
-      subtitle: 'SUM(Rev) / SUM(Spend)',
+      subtitle: 'SUM(GMV) / SUM(Spend)',
       tooltip: 'Pengembalian riil belanja iklan terpadu (Total GMV / Total Spend). Bukan rata-rata angka ROAS masing-masing baris.',
+    },
+    {
+      id: 'orders',
+      label: 'Paid Orders',
+      value: formatNumber(metrics.totalOrders),
+      subtitle: 'Volume pesanan berbayar',
+      tooltip: 'Total volume pesanan berbayar yang dihasilkan langsung melalui kampanye iklan berbayar.',
+      hasWarning: isPartial,
     },
     {
       id: 'cpo',
       label: 'Spend per Order',
       value: formatCurrencyIDR(metrics.spendPerOrder),
-      subtitle: 'Biaya per paid order',
-      tooltip: 'Rata-rata biaya akuisisi belanja iklan untuk setiap pesanan berbayar (Total Spend / Total Paid Orders).',
+      subtitle: 'Biaya akuisisi per pesanan',
+      tooltip: 'Rata-rata biaya belanja iklan untuk setiap pesanan berbayar (Total Spend / Total Paid Orders).',
     },
     {
       id: 'coverage',
       label: 'Data Coverage',
       value: formatPercent(metrics.dataCoverage),
-      subtitle: `${metrics.validRecordsCount} dari ${metrics.totalExpectedRecordsCount} sumber`,
-      tooltip: 'Rasio kelengkapan data aktual dari kanal yang diharapkan terhubung pada periode aktif.',
-      isCoverage: true,
+      subtitle: `${metrics.validRecordsCount} dari ${metrics.totalExpectedRecordsCount} slot data terverifikasi`,
+      tooltip: 'Rasio kelengkapan data aktual dari seluruh kanal dan tanggal penarikan yang diharapkan.',
       hasWarning: metrics.dataCoverage < 1,
     },
   ];
 
   return (
     <section aria-label="Ringkasan Indikator Kinerja Utama (KPI)" className="mb-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      {/* 3-Column spacious grid (2 rows of 3) ensuring full unclipped numbers across all screen sizes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map(card => (
           <div
             key={card.id}
-            className={`relative bg-white rounded-lg border p-4 shadow-2xs transition-shadow hover:shadow-xs flex flex-col justify-between ${
-              card.hasWarning ? 'border-amber-200' : 'border-slate-200'
+            className={`relative bg-white rounded-lg border p-4 shadow-2xs transition-all hover:shadow-xs flex flex-col justify-between overflow-hidden ${
+              card.hasWarning ? 'border-amber-200/90' : 'border-slate-200'
             }`}
           >
             <div>
-              <div className="flex items-center justify-between gap-1 text-slate-500 mb-1.5">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 truncate">
+              {/* Header Label + Info Tooltip */}
+              <div className="flex items-center justify-between gap-1 text-slate-500 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
                   {card.label}
                 </span>
 
-                <div className="relative inline-block">
+                <div className="relative inline-block flex-shrink-0">
                   <button
                     type="button"
                     aria-label={`Informasi untuk ${card.label}`}
@@ -112,7 +113,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics }) => {
                   {activeTooltip === card.id && (
                     <div
                       role="tooltip"
-                      className="absolute z-30 bottom-full right-0 mb-2 w-48 p-2.5 bg-slate-900 text-white text-xs rounded-md shadow-lg leading-normal pointer-events-none"
+                      className="absolute z-30 bottom-full right-0 mb-2 w-56 p-2.5 bg-slate-900 text-white text-xs rounded-md shadow-xl leading-normal pointer-events-none"
                     >
                       {card.tooltip}
                     </div>
@@ -120,19 +121,26 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics }) => {
                 </div>
               </div>
 
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-sans tabular-nums py-0.5">
+              {/* Metric Value: Full unclipped number with optimal typography */}
+              <div
+                className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-sans tabular-nums py-0.5 select-all"
+                title={card.value}
+              >
                 {card.value}
               </div>
             </div>
 
-            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-2xs text-slate-500">
-              <span className="truncate">{card.subtitle}</span>
+            {/* Subtitle Footer */}
+            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span className="truncate pr-1" title={card.subtitle}>
+                {card.subtitle}
+              </span>
               {card.hasWarning && (
                 <span
-                  title="Data parsial: sebagian sumber belum tersedia"
+                  title="Data parsial: sebagian sumber data belum tersedia"
                   className="text-amber-600 flex-shrink-0"
                 >
-                  <AlertCircle className="w-3 h-3" />
+                  <AlertCircle className="w-3.5 h-3.5" />
                 </span>
               )}
             </div>
@@ -142,4 +150,3 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics }) => {
     </section>
   );
 };
-
