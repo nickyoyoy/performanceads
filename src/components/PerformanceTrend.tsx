@@ -126,77 +126,77 @@ export const TrendHighlightsStrip: React.FC<{ records: AdsDailyRecord[] }> = ({
   if (!highlights) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       {/* Best ROAS Day */}
-      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-[#133326]">
-          <span className="w-7 h-7 rounded-xl bg-[#D7F7C4] text-[#133326] flex items-center justify-center shrink-0">
-            <Award className="w-3.5 h-3.5" />
+      <div className="bg-white border border-[#E2EBE0] rounded-xl p-3 sm:p-3.5 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-3xs font-bold uppercase tracking-wider text-[#133326]">
+          <span className="w-6 h-6 rounded-lg bg-[#D7F7C4] text-[#133326] flex items-center justify-center shrink-0">
+            <Award className="w-3 h-3" />
           </span>
           <span className="truncate">ROAS Tertinggi</span>
         </div>
-        <div className="mt-2.5 flex items-baseline gap-2 truncate">
-          <span className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] tabular-nums">
+        <div className="mt-1.5 flex items-baseline gap-1.5 truncate">
+          <span className="text-lg sm:text-xl font-bold font-mono text-[#133326] tabular-nums">
             {formatRoas(highlights.peakRoasDay.roas)}
           </span>
-          <span className="text-2xs text-slate-500 font-mono truncate">
+          <span className="text-3xs text-slate-400 font-mono truncate">
             ({formatDateWIB(highlights.peakRoasDay.date)})
           </span>
         </div>
-        <div className="text-2xs text-slate-500 mt-1 truncate">
+        <div className="text-3xs text-slate-500 mt-0.5 truncate">
           GMV {formatCurrencyIDR(highlights.peakRoasDay.revenue)} &bull; Spend{' '}
           {formatCurrencyIDR(highlights.peakRoasDay.spend)}
         </div>
       </div>
 
       {/* Peak GMV Day */}
-      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-[#133326]">
-          <span className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-            <Zap className="w-3.5 h-3.5" />
+      <div className="bg-white border border-[#E2EBE0] rounded-xl p-3 sm:p-3.5 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-3xs font-bold uppercase tracking-wider text-[#133326]">
+          <span className="w-6 h-6 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <Zap className="w-3 h-3" />
           </span>
           <span className="truncate">Peak GMV Ads</span>
         </div>
-        <div className="mt-2.5 flex items-baseline gap-1.5">
-          <span className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] tabular-nums">
+        <div className="mt-1.5 flex items-baseline gap-1.5">
+          <span className="text-lg sm:text-xl font-bold font-mono text-[#133326] tabular-nums">
             {formatCurrencyIDR(highlights.peakGmvDay.revenue)}
           </span>
         </div>
-        <div className="text-2xs text-slate-500 mt-1 truncate">
+        <div className="text-3xs text-slate-500 mt-0.5 truncate">
           {formatDateWIB(highlights.peakGmvDay.date)} &bull;{' '}
           {formatNumber(highlights.peakGmvDay.orders)} order
         </div>
       </div>
 
       {/* Average Daily Spend */}
-      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-slate-500">
-          <span className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-            <Calendar className="w-3.5 h-3.5" />
+      <div className="bg-white border border-[#E2EBE0] rounded-xl p-3 sm:p-3.5 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-3xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="w-6 h-6 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <Calendar className="w-3 h-3" />
           </span>
           <span className="truncate">Rata-rata Spend / Hari</span>
         </div>
-        <div className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] mt-2.5 tabular-nums">
+        <div className="text-lg sm:text-xl font-bold font-mono text-[#133326] mt-1.5 tabular-nums">
           {formatCurrencyIDR(highlights.avgSpend)}
         </div>
-        <div className="text-2xs text-slate-500 mt-1 truncate">
+        <div className="text-3xs text-slate-500 mt-0.5 truncate">
           Total {formatCurrencyIDR(highlights.totalSpend)} ({highlights.validDays}{' '}
           hari aktif)
         </div>
       </div>
 
       {/* Average Daily GMV */}
-      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-slate-500">
-          <span className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-            <TrendingUp className="w-3.5 h-3.5" />
+      <div className="bg-white border border-[#E2EBE0] rounded-xl p-3 sm:p-3.5 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-3xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="w-6 h-6 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <TrendingUp className="w-3 h-3" />
           </span>
           <span className="truncate">Rata-rata GMV / Hari</span>
         </div>
-        <div className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] mt-2.5 tabular-nums">
+        <div className="text-lg sm:text-xl font-bold font-mono text-[#133326] mt-1.5 tabular-nums">
           {formatCurrencyIDR(highlights.avgRevenue)}
         </div>
-        <div className="text-2xs text-slate-500 mt-1 truncate">
+        <div className="text-3xs text-slate-500 mt-0.5 truncate">
           Blended ROAS:{' '}
           <strong className="text-emerald-700">
             {formatRoas(highlights.blendedRoas)}
@@ -378,34 +378,34 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({
       {/* Main Chart Container Card (COINEST "Cashflow" Card Aesthetic) */}
       <section
         aria-label="Grafik Tren Performa Iklan"
-        className="bg-white rounded-2xl border border-[#E2EBE0] p-5 sm:p-6 shadow-card flex-1 flex flex-col"
+        className="bg-white rounded-2xl border border-[#E2EBE0] p-4 sm:p-5 shadow-card flex-1 flex flex-col"
       >
         <div>
           {/* Row 1: Title + Days Badge on Left | Total GMV Periode on Right */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 mb-3">
             <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <div className="w-8 h-8 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-                  <TrendingUp className="w-4 h-4" />
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="w-7 h-7 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5" />
                 </div>
-                <h2 className="text-base sm:text-lg font-extrabold text-[#133326] tracking-tight">
+                <h2 className="text-sm sm:text-base font-extrabold text-[#133326] tracking-tight">
                   Cashflow & Analisis Tren Harian
                 </h2>
-                <span className="inline-flex items-center whitespace-nowrap shrink-0 text-2xs bg-[#EAF2E8] text-[#133326] px-2.5 py-0.5 rounded-full font-mono font-bold">
+                <span className="inline-flex items-center whitespace-nowrap shrink-0 text-3xs bg-[#EAF2E8] text-[#133326] px-2 py-0.5 rounded-full font-mono font-bold">
                   {distinctDatesCount} Hari
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-2xs text-slate-500 mt-0.5">
                 Visualisasi runtun waktu metrik pendapatan (GMV Ads), belanja iklan (Spend), dan efisiensi ROAS.
               </p>
             </div>
 
             {distinctDatesCount >= 2 && highlights && (
-              <div className="sm:text-right shrink-0 bg-[#F6F9F5] px-3.5 py-2 rounded-xl border border-[#E2EBE0] self-start">
+              <div className="sm:text-right shrink-0 bg-[#F6F9F5] px-3 py-1.5 rounded-lg border border-[#E2EBE0] self-start">
                 <span className="text-3xs uppercase tracking-wider text-slate-400 font-bold block">
                   Total GMV Periode
                 </span>
-                <span className="text-lg sm:text-xl font-extrabold text-[#133326] tabular-nums">
+                <span className="text-base sm:text-lg font-extrabold text-[#133326] tabular-nums">
                   {formatCurrencyIDR(highlights.totalRevenue)}
                 </span>
               </div>

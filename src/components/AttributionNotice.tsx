@@ -3,9 +3,9 @@ import { HelpCircle } from 'lucide-react';
 
 export const AttributionNotice: React.FC = () => {
   return (
-    <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-[#E2EBE0] text-xs text-slate-600 mb-6 shadow-2xs">
-      <div className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center flex-shrink-0">
-        <HelpCircle className="w-4 h-4" aria-hidden="true" />
+    <div className="flex items-start gap-2.5 p-3 rounded-xl bg-white border border-[#E2EBE0] text-2xs text-slate-600 shadow-2xs">
+      <div className="w-6 h-6 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
       </div>
       <div className="leading-relaxed">
         <span className="font-bold text-[#133326]">Catatan Model Atribusi: </span>

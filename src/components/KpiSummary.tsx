@@ -213,42 +213,42 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
   return (
     <section
       aria-label="Ringkasan Indikator Kinerja Utama (KPI)"
-      className="mb-6 space-y-5"
+      className="space-y-4"
     >
       {/* Top Executive Hero Banner (COINEST Dark Forest Green Card Style) */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#133326] text-white p-5 sm:p-6 shadow-card border border-[#1E4A38]">
+      <div className="relative overflow-hidden rounded-2xl bg-[#133326] text-white p-4 sm:p-5 shadow-card border border-[#1E4A38]">
         {/* Decorative Botanical Clover Pattern */}
         <div className="pointer-events-none select-none absolute -right-8 -top-8 w-44 h-44 rounded-full bg-[#1E4A38]/40 blur-2xl" />
         <div className="pointer-events-none select-none absolute right-24 -bottom-10 w-36 h-36 rounded-full bg-[#A7E97F]/10 blur-xl" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Left: Brand Card Identity & Total GMV Realization */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
+          <div className="space-y-2 sm:space-y-2.5">
+            <div className="flex items-center gap-2">
               {/* Clover emblem */}
-              <div className="w-8 h-8 rounded-xl bg-[#A7E97F]/20 border border-[#A7E97F]/40 flex items-center justify-center text-[#A7E97F]">
-                <Radio className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-lg bg-[#A7E97F]/20 border border-[#A7E97F]/40 flex items-center justify-center text-[#A7E97F] shrink-0">
+                <Radio className="w-3.5 h-3.5" />
               </div>
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#A7E97F]">
+                <span className="text-2xs font-bold uppercase tracking-wider text-[#A7E97F]">
                   ScentPlus Executive Ads Card
                 </span>
                 {periodLabel && (
-                  <p className="text-2xs text-emerald-100/75">{periodLabel}</p>
+                  <p className="text-3xs text-emerald-100/75">{periodLabel}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <p className="text-xs text-emerald-100/75 font-medium">
+              <p className="text-2xs text-emerald-100/75 font-medium">
                 Total Realisasi GMV Ads Terverifikasi
               </p>
-              <div className="flex flex-wrap items-baseline gap-3 mt-0.5">
-                <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums text-white">
+              <div className="flex flex-wrap items-baseline gap-2.5 mt-0.5">
+                <span className="text-xl sm:text-3xl font-extrabold tracking-tight tabular-nums text-white">
                   {formatCurrencyIDR(metrics.totalRevenue)}
                 </span>
                 {metrics.revenueAchievementPct !== null && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#A7E97F] text-[#133326]">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold bg-[#A7E97F] text-[#133326]">
                     {formatRatioPercent(metrics.revenueAchievementPct)} dari Target GMV
                   </span>
                 )}
@@ -257,22 +257,22 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
           </div>
 
           {/* Right: Key Balance Metrics in a Balanced 2x2 Grid (Zero Overflow, Perfect Symmetry) */}
-          <div className="grid grid-cols-2 gap-3 w-full lg:w-[430px] xl:w-[470px] shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
-            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+          <div className="grid grid-cols-2 gap-2.5 w-full lg:w-[410px] xl:w-[450px] shrink-0 pt-2.5 lg:pt-0 border-t lg:border-t-0 border-white/10">
+            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10 flex flex-col justify-between">
               <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Total Spend
               </span>
-              <span className="text-base sm:text-lg font-extrabold text-white tabular-nums mt-1 block whitespace-nowrap">
+              <span className="text-sm sm:text-base font-extrabold text-white tabular-nums mt-0.5 block whitespace-nowrap">
                 {formatCurrencyIDR(metrics.totalSpend)}
               </span>
             </div>
 
-            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10 flex flex-col justify-between">
               <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Blended ROAS
               </span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-base sm:text-lg font-extrabold text-[#A7E97F] tabular-nums whitespace-nowrap">
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-sm sm:text-base font-extrabold text-[#A7E97F] tabular-nums whitespace-nowrap">
                   {formatRoas(metrics.blendedRoas)}
                 </span>
                 {metrics.targetBlendedRoas !== null && (
@@ -283,12 +283,12 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
               </div>
             </div>
 
-            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10 flex flex-col justify-between">
               <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Paid Orders
               </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-base sm:text-lg font-extrabold text-white tabular-nums whitespace-nowrap">
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-sm sm:text-base font-extrabold text-white tabular-nums whitespace-nowrap">
                   {formatNumber(metrics.totalOrders)}
                 </span>
                 <span className="text-3xs text-emerald-100/60 font-medium whitespace-nowrap">
@@ -297,15 +297,15 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
               </div>
             </div>
 
-            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10 flex flex-col justify-between">
               <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Data Coverage
               </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-base sm:text-lg font-extrabold text-[#A7E97F] tabular-nums whitespace-nowrap">
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-sm sm:text-base font-extrabold text-[#A7E97F] tabular-nums whitespace-nowrap">
                   {formatPercent(metrics.dataCoverage)}
                 </span>
-                <span className="text-2xs text-emerald-100/75 font-mono whitespace-nowrap">
+                <span className="text-3xs text-emerald-100/75 font-mono whitespace-nowrap">
                   ({metrics.validRecordsCount}/{metrics.totalExpectedRecordsCount})
                 </span>
               </div>
@@ -315,28 +315,28 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       </div>
 
       {/* 3-Column spacious grid (2 rows of 3) styled in COINEST White Card Aesthetic */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {cards.map((card) => {
           const isTooltipOpen =
             activeTooltip === card.id || activeTooltip === `${card.id}-warn`;
           return (
             <div
               key={card.id}
-              className={`relative bg-white rounded-2xl border p-5 shadow-card transition-all hover:shadow-card-hover flex flex-col justify-between overflow-visible ${
+              className={`relative bg-white rounded-xl border p-3.5 sm:p-4 shadow-card transition-all hover:shadow-card-hover flex flex-col justify-between overflow-visible ${
                 isTooltipOpen ? 'z-30' : 'z-10'
               } ${card.hasWarning ? 'border-amber-200/90' : 'border-[#E2EBE0]'}`}
             >
               <div>
                 {/* Top Icon Box + Achievement Pill & Tooltip (COINEST style) */}
-                <div className="flex items-center justify-between gap-2 mb-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
                     {card.icon}
                   </div>
 
                   <div className="flex items-center gap-1.5">
                     {card.achievementText && (
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-2xs font-bold shrink-0 ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-3xs font-bold shrink-0 ${
                           card.achievementStatus === 'success'
                             ? 'bg-[#D7F7C4] text-[#133326]'
                             : card.achievementStatus === 'warning'
@@ -383,14 +383,14 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
 
                 {/* Metric Value: Full unclipped number */}
                 <div
-                  className="text-2xl sm:text-3xl font-extrabold text-[#133326] tracking-tight font-sans tabular-nums py-0.5 select-all"
+                  className="text-xl sm:text-2xl font-extrabold text-[#133326] tracking-tight font-sans tabular-nums py-0 select-all"
                   title={card.value}
                 >
                   {card.value}
                 </div>
 
                 {/* Metric Title Label below value (matching COINEST card hierarchy) */}
-                <div className="flex items-center justify-between gap-1 mt-1">
+                <div className="flex items-center justify-between gap-1 mt-0.5">
                   <span className="text-xs font-bold text-slate-600">
                     {card.label}
                   </span>
@@ -426,10 +426,10 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
 
                 {/* Target Comparison Row */}
                 {card.targetValue ? (
-                  <div className="mt-3 flex items-center justify-between gap-1.5 bg-[#F6F9F5] rounded-xl px-3 py-2 border border-[#E2EBE0] text-xs">
+                  <div className="mt-2.5 flex items-center justify-between gap-1.5 bg-[#F6F9F5] rounded-lg px-2.5 py-1.5 border border-[#E2EBE0] text-2xs">
                     <div className="flex items-center gap-1.5 truncate text-slate-600">
-                      <Target className="w-3.5 h-3.5 text-[#133326] flex-shrink-0" />
-                      <span className="text-2xs font-medium text-slate-500">
+                      <Target className="w-3 h-3 text-[#133326] flex-shrink-0" />
+                      <span className="font-medium text-slate-500">
                         {card.targetLabel}:
                       </span>
                     </div>
@@ -438,8 +438,8 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
                     </span>
                   </div>
                 ) : (
-                  <div className="mt-3 flex items-center gap-1.5 text-2xs text-slate-400 bg-[#F6F9F5] rounded-xl px-3 py-2 border border-[#E2EBE0]">
-                    <Target className="w-3.5 h-3.5 text-slate-300" />
+                  <div className="mt-2.5 flex items-center gap-1.5 text-2xs text-slate-400 bg-[#F6F9F5] rounded-lg px-2.5 py-1.5 border border-[#E2EBE0]">
+                    <Target className="w-3 h-3 text-slate-300" />
                     <span>
                       Target: <em className="not-italic text-slate-500">Belum diatur</em>
                     </span>
@@ -448,7 +448,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
               </div>
 
               {/* Subtitle Footer */}
-              <div className="mt-3 pt-2.5 border-t border-[#ECF2EB] flex items-center justify-between text-2xs text-slate-500">
+              <div className="mt-2 pt-1.5 border-t border-[#ECF2EB] flex items-center justify-between text-3xs text-slate-400">
                 <span className="truncate pr-1" title={card.subtitle}>
                   {card.subtitle}
                 </span>
@@ -460,24 +460,24 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
 
       {/* Target Progress Tracker (Styled like COINEST "Saving Plans" & "Daily Limit") */}
       {hasTargetData ? (
-        <div className="bg-white rounded-2xl border border-[#E2EBE0] p-5 shadow-card">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#ECF2EB] pb-4 mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center flex-shrink-0">
-                <Target className="w-4 h-4" />
+        <div className="bg-white rounded-xl border border-[#E2EBE0] p-3.5 sm:p-4 shadow-card">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#ECF2EB] pb-3 mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center flex-shrink-0">
+                <Target className="w-3.5 h-3.5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-bold text-[#133326]">
+                <h3 className="text-xs sm:text-sm font-bold text-[#133326]">
                   Pencapaian Target vs Realisasi (Spreadsheet DB ADS)
                 </h3>
-                <p className="text-2xs text-slate-500">
+                <p className="text-3xs text-slate-400">
                   Target operasional iklan berbayar sesuai filter periode yang dipilih
                 </p>
               </div>
             </div>
 
             {metrics.targetBlendedRoas !== null && (
-              <div className="flex items-center gap-2.5 bg-[#F6F9F5] px-3.5 py-2 rounded-xl border border-[#E2EBE0] self-start sm:self-auto text-xs">
+              <div className="flex items-center gap-2 bg-[#F6F9F5] px-3 py-1.5 rounded-lg border border-[#E2EBE0] self-start sm:self-auto text-2xs">
                 <span className="text-slate-500 font-medium">Target ROAS:</span>
                 <span className="font-mono font-bold text-[#133326]">
                   {formatRoas(metrics.targetBlendedRoas)}
@@ -491,24 +491,24 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* 1. GMV Ads Progress (COINEST Saving Plan Card Style) */}
-            <div className="bg-[#F6F9F5] rounded-2xl p-4 border border-[#E2EBE0]">
-              <div className="flex items-center justify-between text-xs mb-3">
-                <span className="font-bold text-[#133326] flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
-                    <TrendingUp className="w-3.5 h-3.5" />
+            <div className="bg-[#F6F9F5] rounded-xl p-3 border border-[#E2EBE0]">
+              <div className="flex items-center justify-between text-2xs mb-2">
+                <span className="font-bold text-[#133326] flex items-center gap-1.5">
+                  <span className="w-6 h-6 rounded-md bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
+                    <TrendingUp className="w-3 h-3" />
                   </span>
                   GMV Ads
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold bg-[#D7F7C4] text-[#133326] font-mono">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-3xs font-bold bg-[#D7F7C4] text-[#133326] font-mono">
                   {metrics.revenueAchievementPct !== null
                     ? formatRatioPercent(metrics.revenueAchievementPct)
                     : '—'}
                 </span>
               </div>
               {/* COINEST Dual-Tone Progress Bar: Dark Forest on Mint Lime Track */}
-              <div className="w-full bg-[#D7F7C4] rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-[#D7F7C4] rounded-full h-2 overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500 bg-[#133326]"
                   style={{
@@ -516,27 +516,27 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
                   }}
                 />
               </div>
-              <div className="flex justify-between items-center text-2xs text-slate-600 mt-2.5 font-mono">
+              <div className="flex justify-between items-center text-3xs text-slate-500 mt-2 font-mono">
                 <span className="font-bold text-[#133326]">
                   Realisasi: {formatCurrencyIDR(metrics.totalRevenue)}
                 </span>
-                <span className="text-slate-500">
+                <span className="text-slate-400">
                   Target: {formatCurrencyIDR(metrics.totalTargetRevenue)}
                 </span>
               </div>
             </div>
 
             {/* 2. Spend Budget Progress */}
-            <div className="bg-[#F6F9F5] rounded-2xl p-4 border border-[#E2EBE0]">
-              <div className="flex items-center justify-between text-xs mb-3">
-                <span className="font-bold text-[#133326] flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
-                    <Wallet className="w-3.5 h-3.5" />
+            <div className="bg-[#F6F9F5] rounded-xl p-3 border border-[#E2EBE0]">
+              <div className="flex items-center justify-between text-2xs mb-2">
+                <span className="font-bold text-[#133326] flex items-center gap-1.5">
+                  <span className="w-6 h-6 rounded-md bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
+                    <Wallet className="w-3 h-3" />
                   </span>
                   Spend Budget
                 </span>
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold font-mono ${
+                  className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-3xs font-bold font-mono ${
                     (metrics.spendAchievementPct || 0) > 105
                       ? 'bg-amber-100 text-amber-800'
                       : 'bg-[#D7F7C4] text-[#133326]'
@@ -547,7 +547,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
                     : '—'}
                 </span>
               </div>
-              <div className="w-full bg-[#D7F7C4] rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-[#D7F7C4] rounded-full h-2 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     (metrics.spendAchievementPct || 0) > 105
@@ -559,32 +559,32 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
                   }}
                 />
               </div>
-              <div className="flex justify-between items-center text-2xs text-slate-600 mt-2.5 font-mono">
+              <div className="flex justify-between items-center text-3xs text-slate-500 mt-2 font-mono">
                 <span className="font-bold text-[#133326]">
                   Realisasi: {formatCurrencyIDR(metrics.totalSpend)}
                 </span>
-                <span className="text-slate-500">
+                <span className="text-slate-400">
                   Target: {formatCurrencyIDR(metrics.totalTargetSpend)}
                 </span>
               </div>
             </div>
 
             {/* 3. Paid Orders Progress */}
-            <div className="bg-[#F6F9F5] rounded-2xl p-4 border border-[#E2EBE0]">
-              <div className="flex items-center justify-between text-xs mb-3">
-                <span className="font-bold text-[#133326] flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+            <div className="bg-[#F6F9F5] rounded-xl p-3 border border-[#E2EBE0]">
+              <div className="flex items-center justify-between text-2xs mb-2">
+                <span className="font-bold text-[#133326] flex items-center gap-1.5">
+                  <span className="w-6 h-6 rounded-md bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
+                    <CheckCircle2 className="w-3 h-3" />
                   </span>
                   Paid Orders
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold bg-[#D7F7C4] text-[#133326] font-mono">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-3xs font-bold bg-[#D7F7C4] text-[#133326] font-mono">
                   {metrics.ordersAchievementPct !== null
                     ? formatRatioPercent(metrics.ordersAchievementPct)
                     : '—'}
                 </span>
               </div>
-              <div className="w-full bg-[#D7F7C4] rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-[#D7F7C4] rounded-full h-2 overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-500 bg-[#133326]"
                   style={{
@@ -592,11 +592,11 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
                   }}
                 />
               </div>
-              <div className="flex justify-between items-center text-2xs text-slate-600 mt-2.5 font-mono">
+              <div className="flex justify-between items-center text-3xs text-slate-500 mt-2 font-mono">
                 <span className="font-bold text-[#133326]">
                   Realisasi: {formatNumber(metrics.totalOrders)} order
                 </span>
-                <span className="text-slate-500">
+                <span className="text-slate-400">
                   Target: {formatNumber(metrics.totalTargetOrders)} order
                 </span>
               </div>
@@ -604,12 +604,12 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E2EBE0] px-4 py-3.5 text-xs text-slate-600 flex items-center gap-2.5 shadow-2xs">
-          <div className="w-7 h-7 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-            <Target className="w-4 h-4" />
+        <div className="bg-white rounded-xl border border-[#E2EBE0] px-3.5 py-2.5 text-xs text-slate-600 flex items-center gap-2.5 shadow-2xs">
+          <div className="w-6 h-6 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <Target className="w-3.5 h-3.5" />
           </div>
-          <span>
-            <strong className="text-[#133326]">Catatan Target:</strong> Kolom target (Target Spend, Target GMV, Target Order) belum diisi pada spreadsheet untuk periode tanggal yang dipilih. Target aktif tercatat mulai data <strong>November 2026</strong>.
+          <span className="text-2xs">
+            <strong className="text-[#133326]">Catatan Target:</strong> Kolom target belum diisi pada spreadsheet untuk rentang ini. Target aktif tercatat mulai <strong>November 2026</strong>.
           </span>
         </div>
       )}

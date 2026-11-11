@@ -163,36 +163,36 @@ export const ChannelShareDonut: React.FC<ChannelShareDonutProps> = ({
     : null;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E2EBE0] shadow-card p-5 flex flex-col justify-between h-full">
+    <div className="bg-white rounded-2xl border border-[#E2EBE0] shadow-card p-4 sm:p-5 flex flex-col justify-between h-full">
       <div>
         {/* Card Header */}
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-[#EAF2E8] flex items-center justify-center text-[#133326] shrink-0">
-              <PieChart className="w-4 h-4" />
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-[#EAF2E8] flex items-center justify-center text-[#133326] shrink-0">
+              <PieChart className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-extrabold text-[#133326] tracking-tight truncate">
+              <h3 className="text-sm sm:text-base font-extrabold text-[#133326] tracking-tight truncate">
                 Statistik Kanal
               </h3>
-              <p className="text-2xs text-slate-500 truncate">
+              <p className="text-3xs text-slate-500 truncate">
                 Distribusi porsi per kanal
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-2xs font-bold bg-[#EAF2E8] text-[#133326]">
+          <span className="inline-flex items-center whitespace-nowrap shrink-0 px-2.5 py-0.5 rounded-full text-3xs font-bold bg-[#EAF2E8] text-[#133326]">
             {channelBreakdown.items.length} Kanal
           </span>
         </div>
 
         {/* COINEST-style Dual Metric Tabs */}
-        <div className="grid grid-cols-2 border-b border-[#E2EBE0] mb-5">
+        <div className="grid grid-cols-2 border-b border-[#E2EBE0] mb-3.5">
           <button
             type="button"
             onClick={() => setMode('revenue')}
-            className={`pb-2.5 text-xs font-semibold transition-all text-center border-b-2 ${
+            className={`pb-2 text-2xs font-semibold transition-all text-center border-b-2 ${
               mode === 'revenue'
-                ? 'border-[#133326] text-[#133326]'
+                ? 'border-[#133326] text-[#133326] font-bold'
                 : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -201,9 +201,9 @@ export const ChannelShareDonut: React.FC<ChannelShareDonutProps> = ({
           <button
             type="button"
             onClick={() => setMode('spend')}
-            className={`pb-2.5 text-xs font-semibold transition-all text-center border-b-2 ${
+            className={`pb-2 text-2xs font-semibold transition-all text-center border-b-2 ${
               mode === 'spend'
-                ? 'border-[#133326] text-[#133326]'
+                ? 'border-[#133326] text-[#133326] font-bold'
                 : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >

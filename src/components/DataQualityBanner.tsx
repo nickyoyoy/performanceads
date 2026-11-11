@@ -19,7 +19,7 @@ export const DataQualityBanner: React.FC<DataQualityBannerProps> = ({
   return (
     <section
       aria-label="Status Kualitas Data"
-      className="bg-[#EAF2E8] border border-[#C8DAC4] rounded-2xl p-4 mb-6 transition-all shadow-2xs"
+      className="bg-[#EAF2E8] border border-[#C8DAC4] rounded-xl p-3 sm:p-3.5 transition-all shadow-2xs"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-start gap-3">

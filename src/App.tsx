@@ -173,7 +173,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content Area (Spacious Full-Width Container up to 1600px) */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
           {/* Loading State */}
           {isLoading && !fetchResult && <LoadingView />}
 
@@ -200,7 +200,7 @@ export const App: React.FC = () => {
                   {/* TAB 1: RINGKASAN EKSEKUTIF (OVERVIEW)                     */}
                   {/* ======================================================== */}
                   {activeTab === 'overview' && (
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {/* Data Quality Banner (if data coverage < 100%) */}
                       <DataQualityBanner
                         validCount={kpiMetrics.validRecordsCount}
@@ -221,7 +221,7 @@ export const App: React.FC = () => {
                       <TrendHighlightsStrip records={fetchResult.records} />
 
                       {/* COINEST Middle Section: Cashflow Trend Chart + Statistic Donut Card */}
-                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch mb-6">
+                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch mb-4">
                         <div className="xl:col-span-8">
                           <PerformanceTrend
                             records={fetchResult.records}
@@ -248,15 +248,15 @@ export const App: React.FC = () => {
                   {/* TAB 2: TREN & RINCIAN KANAL (ANALYTICS DEEP DIVE)        */}
                   {/* ======================================================== */}
                   {activeTab === 'analytics' && (
-                    <div className="space-y-6">
-                      <div className="bg-[#EAF2E8] border border-[#C8DAC4] rounded-2xl p-4 text-xs text-[#133326]">
+                    <div className="space-y-4">
+                      <div className="bg-[#EAF2E8] border border-[#C8DAC4] rounded-xl p-3 sm:p-3.5 text-xs text-[#133326]">
                         <strong>Analisis Mendalam:</strong> Silakan telaah dinamika pergerakan belanja iklan, pendapatan GMV, serta fluktuasi ROAS harian lintas kanal. Anda dapat beralih antara grafik terpadu dan memeriksa tabel rincian harian hingga per tanggal.
                       </div>
 
                       {/* Full-Width 4 Strategic Trend Highlight Cards */}
                       <TrendHighlightsStrip records={fetchResult.records} />
 
-                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch mb-6">
+                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch mb-4">
                         <div className="xl:col-span-8">
                           <PerformanceTrend
                             records={fetchResult.records}
@@ -283,8 +283,8 @@ export const App: React.FC = () => {
                   {/* TAB 3: DATA HEALTH & INTEGRASI (OPERATIONAL DIAGNOSTIC)    */}
                   {/* ======================================================== */}
                   {activeTab === 'health' && (
-                    <div className="space-y-6">
-                      <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 text-xs text-amber-950 flex items-center gap-2.5">
+                    <div className="space-y-4">
+                      <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3 sm:p-3.5 text-xs text-amber-950 flex items-center gap-2.5">
                         <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                         <span>
                           <strong>Pusat Pemantauan Operasional (PIC & Data Integrator):</strong> Halaman ini memuat status otentikasi API resmi, sesi login Seller Center (kebutuhan OTP), serta kendala Ads Manager Meta CPAS untuk ditindaklanjuti PIC terkait.
