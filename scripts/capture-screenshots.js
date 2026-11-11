@@ -104,6 +104,20 @@ async function run() {
     await context.close();
   }
 
+  // 6. Calendar Date Range Picker Popup
+  {
+    console.log('Capturing Calendar Date Range Picker Popup...');
+    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    const page = await context.newPage();
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    const pickerBtn = page.locator('button[aria-label="Pilih rentang tanggal dan periode"]');
+    await pickerBtn.click();
+    await page.waitForTimeout(600);
+    await saveScreenshot(page, 'calendar-picker-popup.png');
+    await context.close();
+  }
+
   console.log('Closing browser and server...');
   await browser.close();
   await viteServer.close();

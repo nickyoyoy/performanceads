@@ -1,7 +1,8 @@
 import React from 'react';
-import { AdsFilters, DatePreset } from '../types/ads';
+import { AdsFilters } from '../types/ads';
 import { RefreshCw, RotateCcw, Calendar } from 'lucide-react';
 import { formatDateWIB } from '../utils/formatters';
+import { DateRangePicker } from './DateRangePicker';
 
 interface HeaderProps {
   filters: AdsFilters;
@@ -29,7 +30,9 @@ export const Header: React.FC<HeaderProps> = ({
   const isFilterActive =
     (filters.channel && filters.channel !== 'all') ||
     (filters.status && filters.status !== 'all') ||
-    (filters.datePreset && filters.datePreset !== '30d');
+    (filters.datePreset && filters.datePreset !== '30d') ||
+    Boolean(filters.startDate) ||
+    Boolean(filters.endDate);
 
   const handleChannelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFilterChange({ ...filters, channel: e.target.value });
@@ -37,16 +40,6 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFilterChange({ ...filters, status: e.target.value });
-  };
-
-  const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value as DatePreset;
-    onFilterChange({
-      ...filters,
-      datePreset: val,
-      startDate: undefined,
-      endDate: undefined,
-    });
   };
 
   return (
@@ -104,25 +97,26 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Filter bar */}
         <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Periode filter */}
+            {/* Interactive Calendar Date Range Picker */}
             <div className="flex items-center gap-1.5 text-xs text-slate-600">
-              <label htmlFor="filter-date-preset" className="font-medium text-slate-700">
+              <label className="font-medium text-slate-700">
                 Periode:
               </label>
-              <select
-                id="filter-date-preset"
-                value={filters.datePreset || '30d'}
-                onChange={handlePresetChange}
-                className="bg-slate-50 border border-slate-300 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-medium"
-              >
-                <option value="30d">30 Hari Terakhir (Default)</option>
-                <option value="all">Semua Data ({availableDates.length} Hari, 1 Okt - 10 Nov)</option>
-                <option value="7d">7 Hari Terakhir</option>
-                <option value="mtd">November 2026 (MTD)</option>
-                <option value="prev_month">Oktober 2026 (31 Hari Penuh)</option>
-                <option value="2026-11-09">9 November 2026 (Data Awal)</option>
-                <option value="2026-11-10">10 November 2026 (Hari Ini - Parsial)</option>
-              </select>
+              <DateRangePicker
+                startDate={filters.startDate}
+                endDate={filters.endDate}
+                datePreset={filters.datePreset}
+                availableDates={availableDates}
+                activeDateRangeText={activeDateRangeText}
+                onApply={(start, end, preset) => {
+                  onFilterChange({
+                    ...filters,
+                    datePreset: preset,
+                    startDate: start,
+                    endDate: end,
+                  });
+                }}
+              />
             </div>
 
             {/* Active Range Pill */}

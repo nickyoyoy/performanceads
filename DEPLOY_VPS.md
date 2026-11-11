@@ -145,3 +145,4 @@ npm run build
 pm2 restart scentplus-ads
 ```
 *(Catatan: Untuk data iklan di Google Sheet, Anda **tidak perlu deploy ulang**, dashboard otomatis menyinkronkan data terbaru setiap kali tombol Refresh diklik).*
+
