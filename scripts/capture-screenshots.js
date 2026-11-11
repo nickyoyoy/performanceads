@@ -46,6 +46,9 @@ async function run() {
     const page = await context.newPage();
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
+    const helpBtn = page.locator('button[aria-label="Informasi untuk Paid Orders"]');
+    await helpBtn.hover();
+    await page.waitForTimeout(300);
     await saveScreenshot(page, 'desktop-1920x1080.png', { fullPage: true });
     await context.close();
   }
