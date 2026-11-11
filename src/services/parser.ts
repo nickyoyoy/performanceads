@@ -240,7 +240,21 @@ export function parseAdsCsv(csvContent: string): AdsDailyRecord[] {
 
     const rawStatusVal = parseString(getCell('status'));
     const issueNotes = parseString(getCell('issueNotes'));
-    const { status, rawStatus } = mapStatus(rawStatusVal, issueNotes);
+    const actualSpendVal = parseNumber(getCell('actualSpend'));
+    const actualRevenueVal = parseNumber(getCell('actualRevenue'));
+    const targetSpendVal = parseNumber(getCell('targetSpend'));
+    const targetRevenueVal = parseNumber(getCell('targetRevenue'));
+
+    let { status, rawStatus } = mapStatus(rawStatusVal, issueNotes);
+    if (status === 'unknown') {
+      if (actualSpendVal !== null && actualRevenueVal !== null) {
+        status = 'verified';
+      } else if (actualSpendVal !== null || actualRevenueVal !== null) {
+        status = 'partial';
+      } else if (targetSpendVal !== null || targetRevenueVal !== null) {
+        status = 'pending';
+      }
+    }
 
     const record: AdsDailyRecord = {
       id: generateRecordId(reportDate, channel, adType),
@@ -251,10 +265,10 @@ export function parseAdsCsv(csvContent: string): AdsDailyRecord[] {
       periodStart: parseString(getCell('periodStart')),
       periodEnd: parseString(getCell('periodEnd')),
       cutoff: parseString(getCell('cutoff')),
-      targetSpend: parseNumber(getCell('targetSpend')),
-      actualSpend: parseNumber(getCell('actualSpend')),
-      targetRevenue: parseNumber(getCell('targetRevenue')),
-      actualRevenue: parseNumber(getCell('actualRevenue')),
+      targetSpend: targetSpendVal,
+      actualSpend: actualSpendVal,
+      targetRevenue: targetRevenueVal,
+      actualRevenue: actualRevenueVal,
       targetOrders: parseInteger(getCell('targetOrders')),
       actualOrders: parseInteger(getCell('actualOrders')),
       sourceRoas: parseNumber(getCell('roas')),

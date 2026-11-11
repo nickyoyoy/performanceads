@@ -251,9 +251,9 @@ export const ChannelShareDonut: React.FC<ChannelShareDonutProps> = ({
 
           {/* Center Total Label inside Donut */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-6">
-            <span className="text-3xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5 truncate max-w-[110px]">
+            <span className="text-3xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5 truncate max-w-[115px]">
               {activeHoveredItem
-                ? activeHoveredItem.adType
+                ? activeHoveredItem.adType.split('(')[0].trim()
                 : mode === 'revenue'
                 ? 'Total GMV Ads'
                 : 'Total Spend'}
@@ -278,10 +278,12 @@ export const ChannelShareDonut: React.FC<ChannelShareDonutProps> = ({
           const style = SEGMENT_STYLES[idx % SEGMENT_STYLES.length];
           const pctRounded = Math.round(item.sharePct);
           const isHovered = hoveredChannel === item.key;
+          const shortAdType = item.adType.split('(')[0].trim();
 
           return (
             <div
               key={item.key}
+              title={item.adType}
               onMouseEnter={() => setHoveredChannel(item.key)}
               onMouseLeave={() => setHoveredChannel(null)}
               onClick={() => onSelectChannel?.(item.representativeRecord)}
@@ -291,14 +293,14 @@ export const ChannelShareDonut: React.FC<ChannelShareDonutProps> = ({
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <span
-                  className={`inline-flex items-center justify-center min-w-[42px] px-2 py-1 rounded-lg text-xs font-bold tabular-nums ${style.pillBg} ${style.pillText}`}
+                  className={`inline-flex items-center justify-center min-w-[42px] px-2 py-1 rounded-lg text-xs font-bold tabular-nums shrink-0 ${style.pillBg} ${style.pillText}`}
                 >
                   {pctRounded}%
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
                     <p className="text-xs font-bold text-[#133326] truncate">
-                      {item.adType}
+                      {shortAdType}
                     </p>
                     {onSelectChannel && (
                       <ArrowUpRight className="w-3 h-3 text-slate-400 shrink-0" />

@@ -59,8 +59,11 @@ async function run() {
     await page.waitForTimeout(1000);
     const analyticsTab = page.locator('button:has-text("Tren & Rincian Kanal")');
     await analyticsTab.click();
-    await page.waitForTimeout(800);
-    await saveScreenshot(page, 'tab-analytics.png', { fullPage: false });
+    await page.waitForTimeout(600);
+    const barSlot = page.locator('section[aria-label="Grafik Tren Performa Iklan"] svg g.cursor-pointer').nth(13);
+    await barSlot.hover();
+    await page.waitForTimeout(400);
+    await saveScreenshot(page, 'tab-analytics.png', { fullPage: true });
     await saveScreenshot(page, 'laptop-1366x768.png', { fullPage: false });
     await context.close();
   }

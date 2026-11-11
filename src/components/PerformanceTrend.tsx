@@ -16,6 +16,7 @@ import {
 
 interface PerformanceTrendProps {
   records: AdsDailyRecord[];
+  hideHighlights?: boolean;
 }
 
 type ChartViewType = 'combined' | 'revenue' | 'spend' | 'roas' | 'orders';
@@ -34,7 +35,182 @@ interface DailyAggregatedData {
   hasTarget: boolean;
 }
 
-export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) => {
+export function useTrendHighlights(records: AdsDailyRecord[]) {
+  return useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        spend: number;
+        revenue: number;
+        orders: number;
+        hasValid: boolean;
+      }
+    >();
+
+    for (const r of records) {
+      if (!r.reportDate) continue;
+      const existing = map.get(r.reportDate) || {
+        spend: 0,
+        revenue: 0,
+        orders: 0,
+        hasValid: false,
+      };
+      if (r.actualSpend !== null) {
+        existing.spend += r.actualSpend;
+        existing.hasValid = true;
+      }
+      if (r.actualRevenue !== null) {
+        existing.revenue += r.actualRevenue;
+        existing.hasValid = true;
+      }
+      if (r.actualOrders !== null) {
+        existing.orders += r.actualOrders;
+        existing.hasValid = true;
+      }
+      map.set(r.reportDate, existing);
+    }
+
+    const dailyData = Array.from(map.entries())
+      .map(([date, data]) => ({
+        date,
+        spend: data.hasValid ? data.spend : 0,
+        revenue: data.hasValid ? data.revenue : 0,
+        orders: data.hasValid ? data.orders : 0,
+        roas: data.hasValid && data.spend > 0 ? data.revenue / data.spend : 0,
+        hasValid: data.hasValid,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (dailyData.length < 2) return null;
+
+    let peakGmvDay = dailyData[0];
+    let peakRoasDay = dailyData[0];
+    let totalSpend = 0;
+    let totalRevenue = 0;
+    let totalOrders = 0;
+    let validDays = 0;
+
+    for (const d of dailyData) {
+      if (d.hasValid) {
+        totalSpend += d.spend;
+        totalRevenue += d.revenue;
+        totalOrders += d.orders;
+        validDays++;
+        if (d.revenue > peakGmvDay.revenue) peakGmvDay = d;
+        if (d.roas > peakRoasDay.roas && d.spend >= 1000000) peakRoasDay = d;
+      }
+    }
+
+    const avgSpend = validDays > 0 ? totalSpend / validDays : 0;
+    const avgRevenue = validDays > 0 ? totalRevenue / validDays : 0;
+    const blendedRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+
+    return {
+      peakGmvDay,
+      peakRoasDay,
+      totalSpend,
+      totalRevenue,
+      totalOrders,
+      avgSpend,
+      avgRevenue,
+      blendedRoas,
+      validDays,
+    };
+  }, [records]);
+}
+
+export const TrendHighlightsStrip: React.FC<{ records: AdsDailyRecord[] }> = ({
+  records,
+}) => {
+  const highlights = useTrendHighlights(records);
+  if (!highlights) return null;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* Best ROAS Day */}
+      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-[#133326]">
+          <span className="w-7 h-7 rounded-xl bg-[#D7F7C4] text-[#133326] flex items-center justify-center shrink-0">
+            <Award className="w-3.5 h-3.5" />
+          </span>
+          <span className="truncate">ROAS Tertinggi</span>
+        </div>
+        <div className="mt-2.5 flex items-baseline gap-2 truncate">
+          <span className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] tabular-nums">
+            {formatRoas(highlights.peakRoasDay.roas)}
+          </span>
+          <span className="text-2xs text-slate-500 font-mono truncate">
+            ({formatDateWIB(highlights.peakRoasDay.date)})
+          </span>
+        </div>
+        <div className="text-2xs text-slate-500 mt-1 truncate">
+          GMV {formatCurrencyIDR(highlights.peakRoasDay.revenue)} &bull; Spend{' '}
+          {formatCurrencyIDR(highlights.peakRoasDay.spend)}
+        </div>
+      </div>
+
+      {/* Peak GMV Day */}
+      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-[#133326]">
+          <span className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <Zap className="w-3.5 h-3.5" />
+          </span>
+          <span className="truncate">Peak GMV Ads</span>
+        </div>
+        <div className="mt-2.5 flex items-baseline gap-1.5">
+          <span className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] tabular-nums">
+            {formatCurrencyIDR(highlights.peakGmvDay.revenue)}
+          </span>
+        </div>
+        <div className="text-2xs text-slate-500 mt-1 truncate">
+          {formatDateWIB(highlights.peakGmvDay.date)} &bull;{' '}
+          {formatNumber(highlights.peakGmvDay.orders)} order
+        </div>
+      </div>
+
+      {/* Average Daily Spend */}
+      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <Calendar className="w-3.5 h-3.5" />
+          </span>
+          <span className="truncate">Rata-rata Spend / Hari</span>
+        </div>
+        <div className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] mt-2.5 tabular-nums">
+          {formatCurrencyIDR(highlights.avgSpend)}
+        </div>
+        <div className="text-2xs text-slate-500 mt-1 truncate">
+          Total {formatCurrencyIDR(highlights.totalSpend)} ({highlights.validDays}{' '}
+          hari aktif)
+        </div>
+      </div>
+
+      {/* Average Daily GMV */}
+      <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
+        <div className="flex items-center gap-2 text-2xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="w-7 h-7 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+            <TrendingUp className="w-3.5 h-3.5" />
+          </span>
+          <span className="truncate">Rata-rata GMV / Hari</span>
+        </div>
+        <div className="text-xl sm:text-2xl font-extrabold font-mono text-[#133326] mt-2.5 tabular-nums">
+          {formatCurrencyIDR(highlights.avgRevenue)}
+        </div>
+        <div className="text-2xs text-slate-500 mt-1 truncate">
+          Blended ROAS:{' '}
+          <strong className="text-emerald-700">
+            {formatRoas(highlights.blendedRoas)}
+          </strong>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({
+  records,
+  hideHighlights = false,
+}) => {
   const [chartView, setChartView] = useState<ChartViewType>('combined');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,7 +275,8 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
 
     return Array.from(map.entries())
       .map(([date, data]) => {
-        const roas = data.hasValid && data.spend > 0 ? data.revenue / data.spend : 0;
+        const roas =
+          data.hasValid && data.spend > 0 ? data.revenue / data.spend : 0;
         const spendPerOrder =
           data.hasValid && data.orders > 0 ? data.spend / data.orders : 0;
         return {
@@ -120,50 +297,12 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
   }, [records]);
 
   const distinctDatesCount = dailyData.length;
+  const highlights = useTrendHighlights(records);
 
-  // Trend Highlights & Summary Calculations
-  const highlights = useMemo(() => {
-    if (dailyData.length === 0) return null;
-
-    let peakGmvDay = dailyData[0];
-    let peakRoasDay = dailyData[0];
-    let totalSpend = 0;
-    let totalRevenue = 0;
-    let totalOrders = 0;
-    let validDays = 0;
-
-    for (const d of dailyData) {
-      if (d.hasValid) {
-        totalSpend += d.spend;
-        totalRevenue += d.revenue;
-        totalOrders += d.orders;
-        validDays++;
-        if (d.revenue > peakGmvDay.revenue) peakGmvDay = d;
-        if (d.roas > peakRoasDay.roas && d.spend >= 1000000) peakRoasDay = d;
-      }
-    }
-
-    const avgSpend = validDays > 0 ? totalSpend / validDays : 0;
-    const avgRevenue = validDays > 0 ? totalRevenue / validDays : 0;
-    const blendedRoas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
-
-    return {
-      peakGmvDay,
-      peakRoasDay,
-      totalSpend,
-      totalRevenue,
-      totalOrders,
-      avgSpend,
-      avgRevenue,
-      blendedRoas,
-      validDays,
-    };
-  }, [dailyData]);
-
-  // Chart coordinate mapping
+  // Chart coordinate mapping (generous vertical height so bars & tooltips breathe)
   const chartWidth = 980;
-  const chartHeight = 280;
-  const padding = { top: 25, right: 25, bottom: 40, left: 90 };
+  const chartHeight = 360;
+  const padding = { top: 24, right: 24, bottom: 34, left: 86 };
   const innerWidth = chartWidth - padding.left - padding.right;
   const innerHeight = chartHeight - padding.top - padding.bottom;
 
@@ -228,222 +367,174 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
     return `M ${points.join(' L ')}`;
   }, [dailyData, innerWidth, innerHeight, padding.left, padding.top]);
 
+  const activeDay = hoveredIndex !== null ? dailyData[hoveredIndex] : null;
+  const isRightHalf =
+    hoveredIndex !== null && hoveredIndex >= dailyData.length / 2;
+
   return (
-    <div className="space-y-4 mb-6">
-      {/* Strategic Highlights Banner Strip (All 4 Cards Preserved) */}
-      {highlights && distinctDatesCount >= 2 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3.5">
-          {/* Best ROAS Day */}
-          <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-            <div className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-[#133326]">
-              <span className="w-6 h-6 rounded-lg bg-[#D7F7C4] text-[#133326] flex items-center justify-center shrink-0">
-                <Award className="w-3.5 h-3.5" />
-              </span>
-              <span className="truncate">ROAS Tertinggi</span>
-            </div>
-            <div className="mt-2 flex items-baseline gap-1.5 truncate">
-              <span className="text-lg sm:text-xl font-extrabold font-mono text-[#133326]">
-                {formatRoas(highlights.peakRoasDay.roas)}
-              </span>
-              <span className="text-2xs text-slate-500 font-mono truncate">
-                ({formatDateWIB(highlights.peakRoasDay.date)})
-              </span>
-            </div>
-            <div className="text-2xs text-slate-500 mt-0.5 truncate">
-              GMV {formatCurrencyIDR(highlights.peakRoasDay.revenue)} &bull; Spend{' '}
-              {formatCurrencyIDR(highlights.peakRoasDay.spend)}
-            </div>
-          </div>
-
-          {/* Peak GMV Day */}
-          <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-            <div className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-[#133326]">
-              <span className="w-6 h-6 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-                <Zap className="w-3.5 h-3.5" />
-              </span>
-              <span className="truncate">Peak GMV Ads</span>
-            </div>
-            <div className="mt-2 flex items-baseline gap-1.5 truncate">
-              <span className="text-lg sm:text-xl font-extrabold font-mono text-[#133326] truncate">
-                {formatCurrencyIDR(highlights.peakGmvDay.revenue)}
-              </span>
-            </div>
-            <div className="text-2xs text-slate-500 mt-0.5 truncate">
-              {formatDateWIB(highlights.peakGmvDay.date)} &bull;{' '}
-              {formatNumber(highlights.peakGmvDay.orders)} order
-            </div>
-          </div>
-
-          {/* Average Daily Spend */}
-          <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-            <div className="text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
-              Rata-rata Spend / Hari
-            </div>
-            <div className="text-lg sm:text-xl font-extrabold font-mono text-[#133326] mt-2 truncate">
-              {formatCurrencyIDR(highlights.avgSpend)}
-            </div>
-            <div className="text-2xs text-slate-500 mt-0.5 truncate">
-              Total {formatCurrencyIDR(highlights.totalSpend)} ({highlights.validDays} hari aktif)
-            </div>
-          </div>
-
-          {/* Average Daily GMV */}
-          <div className="bg-white border border-[#E2EBE0] rounded-2xl p-4 shadow-card overflow-hidden min-w-0">
-            <div className="text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
-              Rata-rata GMV / Hari
-            </div>
-            <div className="text-lg sm:text-xl font-extrabold font-mono text-[#133326] mt-2 truncate">
-              {formatCurrencyIDR(highlights.avgRevenue)}
-            </div>
-            <div className="text-2xs text-slate-500 mt-0.5 truncate">
-              Blended ROAS:{' '}
-              <strong className="text-emerald-700">
-                {formatRoas(highlights.blendedRoas)}
-              </strong>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="h-full flex flex-col">
+      {!hideHighlights && <TrendHighlightsStrip records={records} />}
 
       {/* Main Chart Container Card (COINEST "Cashflow" Card Aesthetic) */}
       <section
         aria-label="Grafik Tren Performa Iklan"
-        className="bg-white rounded-2xl border border-[#E2EBE0] p-5 sm:p-6 shadow-card"
+        className="bg-white rounded-2xl border border-[#E2EBE0] p-5 sm:p-6 shadow-card flex-1 flex flex-col"
       >
-        {/* Chart Toolbar */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center">
-                <TrendingUp className="w-4 h-4" />
+        <div>
+          {/* Row 1: Title + Days Badge on Left | Total GMV Periode on Right */}
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="w-8 h-8 rounded-xl bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-[#133326] tracking-tight">
+                  Cashflow & Analisis Tren Harian
+                </h2>
+                <span className="inline-flex items-center whitespace-nowrap shrink-0 text-2xs bg-[#EAF2E8] text-[#133326] px-2.5 py-0.5 rounded-full font-mono font-bold">
+                  {distinctDatesCount} Hari
+                </span>
               </div>
-              <h2 className="text-base sm:text-lg font-bold text-[#133326] tracking-tight">
-                Cashflow & Analisis Tren Harian
-              </h2>
-              <span className="text-2xs bg-[#EAF2E8] text-[#133326] px-2.5 py-0.5 rounded-full font-mono font-bold">
-                {distinctDatesCount} Hari
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Visualisasi runtun waktu metrik pendapatan (GMV Ads), belanja iklan (Spend), dan efisiensi ROAS.
-            </p>
-          </div>
-
-          {/* View Mode Selector Tabs */}
-          <div className="inline-flex flex-wrap rounded-full border border-[#E2EBE0] p-1 bg-[#F6F9F5] self-start xl:self-center gap-0.5">
-            <button
-              type="button"
-              onClick={() => setChartView('combined')}
-              className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
-                chartView === 'combined'
-                  ? 'bg-[#133326] text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-[#133326]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>GMV & Spend Terpadu</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartView('revenue')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
-                chartView === 'revenue'
-                  ? 'bg-[#133326] text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-[#133326]'
-              }`}
-            >
-              GMV Ads
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartView('spend')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
-                chartView === 'spend'
-                  ? 'bg-[#133326] text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-[#133326]'
-              }`}
-            >
-              Spend
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartView('roas')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
-                chartView === 'roas'
-                  ? 'bg-[#133326] text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-[#133326]'
-              }`}
-            >
-              ROAS
-            </button>
-            <button
-              type="button"
-              onClick={() => setChartView('orders')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
-                chartView === 'orders'
-                  ? 'bg-[#133326] text-white shadow-2xs'
-                  : 'text-slate-600 hover:text-[#133326]'
-              }`}
-            >
-              Order
-            </button>
-          </div>
-        </div>
-
-        {/* COINEST Total Balance + Legend Row */}
-        {distinctDatesCount >= 2 && highlights && (
-          <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600 mb-4 border-b border-[#ECF2EB] pb-3.5">
-            <div className="flex items-baseline gap-2.5">
-              <span className="text-xs text-slate-500 font-medium">Total GMV Periode:</span>
-              <span className="text-xl sm:text-2xl font-extrabold text-[#133326] tabular-nums">
-                {formatCurrencyIDR(highlights.totalRevenue)}
-              </span>
+              <p className="text-xs text-slate-500 mt-1">
+                Visualisasi runtun waktu metrik pendapatan (GMV Ads), belanja iklan (Spend), dan efisiensi ROAS.
+              </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-5">
-              {chartView === 'combined' && (
-                <>
+            {distinctDatesCount >= 2 && highlights && (
+              <div className="sm:text-right shrink-0 bg-[#F6F9F5] px-3.5 py-2 rounded-xl border border-[#E2EBE0] self-start">
+                <span className="text-3xs uppercase tracking-wider text-slate-400 font-bold block">
+                  Total GMV Periode
+                </span>
+                <span className="text-lg sm:text-xl font-extrabold text-[#133326] tabular-nums">
+                  {formatCurrencyIDR(highlights.totalRevenue)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Row 2: Single-Line Segmented View Mode Tabs + Legend */}
+          <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-3 mb-4 pb-3.5 border-b border-[#ECF2EB]">
+            {/* View Mode Selector Tabs — Never wraps into an awkward multi-line oval */}
+            <div className="inline-flex items-center rounded-xl border border-[#E2EBE0] p-1 bg-[#F6F9F5] gap-1 overflow-x-auto max-w-full self-start">
+              <button
+                type="button"
+                onClick={() => setChartView('combined')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  chartView === 'combined'
+                    ? 'bg-[#133326] text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-[#133326]'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>GMV & Spend Terpadu</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartView('revenue')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  chartView === 'revenue'
+                    ? 'bg-[#133326] text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-[#133326]'
+                }`}
+              >
+                GMV Ads
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartView('spend')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  chartView === 'spend'
+                    ? 'bg-[#133326] text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-[#133326]'
+                }`}
+              >
+                Spend
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartView('roas')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  chartView === 'roas'
+                    ? 'bg-[#133326] text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-[#133326]'
+                }`}
+              >
+                ROAS
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartView('orders')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  chartView === 'orders'
+                    ? 'bg-[#133326] text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-[#133326]'
+                }`}
+              >
+                Order
+              </button>
+            </div>
+
+            {/* Legend */}
+            {distinctDatesCount >= 2 && (
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+                {chartView === 'combined' && (
+                  <>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-xs bg-[#133326] inline-block" />
+                      <span className="font-semibold text-[#133326]">
+                        GMV Ads (Income)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-xs bg-[#94E169] inline-block" />
+                      <span className="font-semibold text-[#133326]">
+                        Spend (Expense)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-4 h-0.5 bg-emerald-600 inline-block" />
+                      <span className="font-semibold text-[#133326]">
+                        ROAS (Garis Tren)
+                      </span>
+                    </div>
+                  </>
+                )}
+                {chartView === 'revenue' && (
                   <div className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded-xs bg-[#133326] inline-block" />
-                    <span className="font-semibold text-[#133326]">GMV Ads (Income)</span>
+                    <span className="font-semibold text-[#133326]">
+                      Realisasi GMV Ads
+                    </span>
                   </div>
+                )}
+                {chartView === 'spend' && (
                   <div className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded-xs bg-[#94E169] inline-block" />
-                    <span className="font-semibold text-[#133326]">Spend (Expense)</span>
+                    <span className="font-semibold text-[#133326]">
+                      Realisasi Spend Iklan
+                    </span>
                   </div>
+                )}
+                {chartView === 'roas' && (
                   <div className="flex items-center gap-1.5">
-                    <span className="w-4 h-0.5 bg-emerald-600 inline-block" />
-                    <span className="font-semibold text-[#133326]">ROAS (Garis Tren)</span>
+                    <span className="w-3 h-3 rounded-xs bg-[#1E4A38] inline-block" />
+                    <span className="font-semibold text-[#133326]">
+                      Return on Ad Spend (ROAS)
+                    </span>
                   </div>
-                </>
-              )}
-              {chartView === 'revenue' && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-xs bg-[#133326] inline-block" />
-                  <span className="font-semibold text-[#133326]">Realisasi GMV Ads</span>
-                </div>
-              )}
-              {chartView === 'spend' && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-xs bg-[#94E169] inline-block" />
-                  <span className="font-semibold text-[#133326]">Realisasi Spend Iklan</span>
-                </div>
-              )}
-              {chartView === 'roas' && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-xs bg-[#1E4A38] inline-block" />
-                  <span className="font-semibold text-[#133326]">Return on Ad Spend (ROAS)</span>
-                </div>
-              )}
-              {chartView === 'orders' && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-xs bg-[#133326] inline-block" />
-                  <span className="font-semibold text-[#133326]">Total Paid Order</span>
-                </div>
-              )}
-            </div>
+                )}
+                {chartView === 'orders' && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-xs bg-[#133326] inline-block" />
+                    <span className="font-semibold text-[#133326]">
+                      Total Paid Order
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {distinctDatesCount < 2 ? (
           /* Limited State for single day */
@@ -457,8 +548,9 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
               </h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                 Filter saat ini hanya mencakup 1 hari (
-                {dailyData[0]?.date ? formatDateWIB(dailyData[0].date) : '—'}). Pilih periode{' '}
-                <strong>30 Hari Terakhir</strong> pada filter di atas untuk visualisasi tren lengkap.
+                {dailyData[0]?.date ? formatDateWIB(dailyData[0].date) : '—'}).
+                Pilih periode <strong>30 Hari Terakhir</strong> pada filter di
+                atas untuk visualisasi tren lengkap.
               </p>
               {dailyData.length > 0 && (
                 <div className="mt-4 inline-flex items-center gap-3 px-4 py-2 bg-white border border-[#E2EBE0] rounded-xl text-xs font-mono">
@@ -476,10 +568,10 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
             </div>
           </div>
         ) : (
-          /* High-Definition Responsive SVG Chart */
+          /* High-Definition Responsive SVG Chart — overflow-visible ensures tooltip is NEVER clipped */
           <div
             ref={containerRef}
-            className="relative w-full overflow-hidden select-none"
+            className="relative w-full overflow-visible select-none flex-1 flex flex-col justify-between"
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <svg
@@ -527,6 +619,14 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
 
                 const isHovered = hoveredIndex === i;
 
+                // Prevent X-axis date ticks from overlapping at the end (e.g. 11/10 and 11/11)
+                const tickStep = Math.max(1, Math.ceil(dailyData.length / 7));
+                const isLastTick = i === dailyData.length - 1;
+                const isPeriodicTick =
+                  i % tickStep === 0 &&
+                  dailyData.length - 1 - i >= Math.ceil(tickStep * 0.65);
+                const showXLabel = isLastTick || isPeriodicTick;
+
                 return (
                   <g
                     key={i}
@@ -551,7 +651,7 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
                         height={innerHeight}
                         rx="6"
                         fill="#EAF2E8"
-                        opacity="0.65"
+                        opacity="0.75"
                       />
                     )}
 
@@ -629,14 +729,13 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
                       />
                     )}
 
-                    {/* X-Axis date label ticks */}
-                    {(i % Math.ceil(dailyData.length / 8) === 0 ||
-                      i === dailyData.length - 1) && (
+                    {/* X-Axis date label ticks (non-overlapping) */}
+                    {showXLabel && (
                       <text
                         x={slotCenterX}
-                        y={chartHeight - 12}
+                        y={chartHeight - 10}
                         textAnchor="middle"
-                        className="text-3xs fill-slate-500 font-mono font-medium"
+                        className="text-3xs fill-slate-500 font-mono font-semibold"
                       >
                         {d.date.slice(5).replace('-', '/')}
                       </text>
@@ -658,118 +757,152 @@ export const PerformanceTrend: React.FC<PerformanceTrendProps> = ({ records }) =
               )}
             </svg>
 
-            {/* COINEST Floating White Card Tooltip */}
-            {hoveredIndex !== null && dailyData[hoveredIndex] && (
+            {/* Unclipped, Compact 2-Column Floating Tooltip Card */}
+            {activeDay && hoveredIndex !== null && (
               <div
-                className="absolute z-30 pointer-events-none bg-white text-[#133326] p-3.5 rounded-2xl shadow-xl text-xs font-sans border border-[#DCE8DA] min-w-[220px]"
+                className="absolute z-40 pointer-events-none bg-white/98 backdrop-blur-md text-[#133326] p-3.5 rounded-2xl shadow-2xl text-xs font-sans border border-[#C8DAC4] w-[310px] sm:w-[340px]"
                 style={{
-                  top: '12px',
-                  left: `${Math.min(
-                    75,
-                    Math.max(12, (hoveredIndex / (dailyData.length - 1)) * 100)
-                  )}%`,
-                  transform: 'translateX(-50%)',
+                  top: '0px',
+                  left: isRightHalf ? '12%' : '52%',
                 }}
               >
-                <div className="flex items-center justify-between border-b border-[#ECF2EB] pb-2 mb-2">
-                  <span className="font-bold text-[#133326]">
-                    {formatDateWIB(dailyData[hoveredIndex].date)}
+                {/* Tooltip Header: Date + ROAS Pill */}
+                <div className="flex items-center justify-between border-b border-[#ECF2EB] pb-2 mb-2.5">
+                  <span className="font-extrabold text-sm text-[#133326]">
+                    {formatDateWIB(activeDay.date)}
                   </span>
-                  <span className="font-mono text-2xs bg-[#D7F7C4] px-2 py-0.5 rounded-full text-[#133326] font-bold">
-                    ROAS {formatRoas(dailyData[hoveredIndex].roas)}
+                  <span className="font-mono text-2xs bg-[#A7E97F] px-2.5 py-0.5 rounded-full text-[#133326] font-extrabold">
+                    ROAS {formatRoas(activeDay.roas)}
                   </span>
                 </div>
-                <div className="space-y-1.5 font-mono text-2xs">
-                  <div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-500 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#133326]" />
-                        GMV Ads:
-                      </span>
-                      <strong className="text-[#133326]">
-                        {formatCurrencyIDR(dailyData[hoveredIndex].revenue)}
-                      </strong>
+
+                {/* 2x2 Compact Metric Grid inside Tooltip — Never gets cut off vertically! */}
+                <div className="grid grid-cols-2 gap-2 font-mono text-2xs">
+                  {/* Box 1: GMV Ads */}
+                  <div className="bg-[#F6F9F5] p-2 rounded-xl border border-[#E2EBE0]">
+                    <div className="flex items-center gap-1.5 text-3xs font-sans font-semibold text-slate-500">
+                      <span className="w-2 h-2 rounded-full bg-[#133326]" />
+                      <span>GMV Ads</span>
                     </div>
-                    {dailyData[hoveredIndex].hasTarget &&
-                      dailyData[hoveredIndex].targetRevenue > 0 && (
-                        <div className="flex justify-between text-emerald-700 font-sans text-3xs pl-3.5">
-                          <span>
-                            Target: {formatCurrencyIDR(dailyData[hoveredIndex].targetRevenue)}
-                          </span>
-                          <span className="font-bold">
-                            {(
-                              (dailyData[hoveredIndex].revenue /
-                                dailyData[hoveredIndex].targetRevenue) *
-                              100
-                            ).toFixed(0)}
-                            %
-                          </span>
-                        </div>
-                      )}
+                    <div className="font-extrabold text-xs text-[#133326] mt-0.5 tabular-nums">
+                      {formatCurrencyIDR(activeDay.revenue)}
+                    </div>
+                    {activeDay.hasTarget && activeDay.targetRevenue > 0 && (
+                      <div className="flex items-center justify-between text-3xs font-sans text-emerald-700 mt-0.5">
+                        <span className="truncate">
+                          Tgt: {formatCurrencyIDR(activeDay.targetRevenue)}
+                        </span>
+                        <span className="font-bold ml-1">
+                          {(
+                            (activeDay.revenue / activeDay.targetRevenue) *
+                            100
+                          ).toFixed(0)}
+                          %
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-500 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#94E169]" />
-                        Spend:
-                      </span>
-                      <strong className="text-[#133326]">
-                        {formatCurrencyIDR(dailyData[hoveredIndex].spend)}
-                      </strong>
+                  {/* Box 2: Spend */}
+                  <div className="bg-[#F6F9F5] p-2 rounded-xl border border-[#E2EBE0]">
+                    <div className="flex items-center gap-1.5 text-3xs font-sans font-semibold text-slate-500">
+                      <span className="w-2 h-2 rounded-full bg-[#94E169]" />
+                      <span>Spend Iklan</span>
                     </div>
-                    {dailyData[hoveredIndex].hasTarget &&
-                      dailyData[hoveredIndex].targetSpend > 0 && (
-                        <div className="flex justify-between text-slate-500 font-sans text-3xs pl-3.5">
-                          <span>
-                            Target: {formatCurrencyIDR(dailyData[hoveredIndex].targetSpend)}
-                          </span>
-                          <span className="font-bold">
-                            {(
-                              (dailyData[hoveredIndex].spend /
-                                dailyData[hoveredIndex].targetSpend) *
-                              100
-                            ).toFixed(0)}
-                            %
-                          </span>
-                        </div>
-                      )}
+                    <div className="font-extrabold text-xs text-[#133326] mt-0.5 tabular-nums">
+                      {formatCurrencyIDR(activeDay.spend)}
+                    </div>
+                    {activeDay.hasTarget && activeDay.targetSpend > 0 && (
+                      <div className="flex items-center justify-between text-3xs font-sans text-slate-500 mt-0.5">
+                        <span className="truncate">
+                          Tgt: {formatCurrencyIDR(activeDay.targetSpend)}
+                        </span>
+                        <span className="font-bold text-[#133326] ml-1">
+                          {(
+                            (activeDay.spend / activeDay.targetSpend) *
+                            100
+                          ).toFixed(0)}
+                          %
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Paid Order:</span>
-                      <strong className="text-[#133326]">
-                        {formatNumber(dailyData[hoveredIndex].orders)}
-                      </strong>
+                  {/* Box 3: Paid Order */}
+                  <div className="bg-[#F6F9F5] p-2 rounded-xl border border-[#E2EBE0]">
+                    <div className="text-3xs font-sans font-semibold text-slate-500">
+                      Paid Order
                     </div>
-                    {dailyData[hoveredIndex].hasTarget &&
-                      dailyData[hoveredIndex].targetOrders > 0 && (
-                        <div className="flex justify-between text-slate-500 font-sans text-3xs">
-                          <span>
-                            Target: {formatNumber(dailyData[hoveredIndex].targetOrders)}
-                          </span>
-                          <span className="font-bold">
-                            {(
-                              (dailyData[hoveredIndex].orders /
-                                dailyData[hoveredIndex].targetOrders) *
-                              100
-                            ).toFixed(0)}
-                            %
-                          </span>
-                        </div>
-                      )}
+                    <div className="font-extrabold text-xs text-[#133326] mt-0.5 tabular-nums">
+                      {formatNumber(activeDay.orders)} order
+                    </div>
+                    {activeDay.hasTarget && activeDay.targetOrders > 0 && (
+                      <div className="flex items-center justify-between text-3xs font-sans text-slate-500 mt-0.5">
+                        <span>Tgt: {formatNumber(activeDay.targetOrders)}</span>
+                        <span className="font-bold text-[#133326]">
+                          {(
+                            (activeDay.orders / activeDay.targetOrders) *
+                            100
+                          ).toFixed(0)}
+                          %
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex justify-between border-t border-[#ECF2EB] pt-1.5 mt-1">
-                    <span className="text-slate-500">Spend / Order:</span>
-                    <strong className="text-slate-700">
-                      {formatCurrencyIDR(dailyData[hoveredIndex].spendPerOrder)}
-                    </strong>
+                  {/* Box 4: Spend / Order (CPO) */}
+                  <div className="bg-[#F6F9F5] p-2 rounded-xl border border-[#E2EBE0] flex flex-col justify-between">
+                    <div className="text-3xs font-sans font-semibold text-slate-500">
+                      Spend / Order (CPO)
+                    </div>
+                    <div className="font-extrabold text-xs text-[#133326] mt-0.5 tabular-nums">
+                      {formatCurrencyIDR(activeDay.spendPerOrder)}
+                    </div>
+                    <div className="text-3xs font-sans text-slate-400 mt-0.5">
+                      Biaya per konversi
+                    </div>
                   </div>
                 </div>
               </div>
             )}
+
+            {/* Bottom Live Inspection Strip — Ensures 100% readable values & balanced card height */}
+            <div className="mt-3 pt-3 border-t border-[#ECF2EB] flex flex-wrap items-center justify-between gap-2 text-2xs text-slate-500">
+              {activeDay ? (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[#133326]">
+                  <span className="font-sans font-bold text-[#133326] bg-[#EAF2E8] px-2 py-0.5 rounded-md">
+                    {formatDateWIB(activeDay.date)}
+                  </span>
+                  <span>
+                    GMV: <strong>{formatCurrencyIDR(activeDay.revenue)}</strong>
+                  </span>
+                  <span>
+                    Spend: <strong>{formatCurrencyIDR(activeDay.spend)}</strong>
+                  </span>
+                  <span>
+                    Order: <strong>{formatNumber(activeDay.orders)}</strong>
+                  </span>
+                  <span>
+                    CPO: <strong>{formatCurrencyIDR(activeDay.spendPerOrder)}</strong>
+                  </span>
+                  <span className="text-emerald-700 font-bold">
+                    ROAS: {formatRoas(activeDay.roas)}
+                  </span>
+                </div>
+              ) : (
+                <span>
+                  *Arahkan kursor pada batang grafik untuk menginspeksi rincian Realisasi vs Target harian.
+                </span>
+              )}
+              {highlights && (
+                <span className="font-mono text-slate-500 ml-auto">
+                  Blended ROAS Periode:{' '}
+                  <strong className="text-[#133326]">
+                    {formatRoas(highlights.blendedRoas)}
+                  </strong>
+                </span>
+              )}
+            </div>
           </div>
         )}
       </section>

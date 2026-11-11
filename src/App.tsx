@@ -8,7 +8,7 @@ import { FallbackIndicator } from './components/FallbackIndicator';
 import { DataQualityBanner } from './components/DataQualityBanner';
 import { AttributionNotice } from './components/AttributionNotice';
 import { KpiSummary } from './components/KpiSummary';
-import { PerformanceTrend } from './components/PerformanceTrend';
+import { PerformanceTrend, TrendHighlightsStrip } from './components/PerformanceTrend';
 import { ChannelShareDonut } from './components/ChannelShareDonut';
 import { ChannelTable } from './components/ChannelTable';
 import { DetailDrawer } from './components/DetailDrawer';
@@ -393,12 +393,18 @@ export const App: React.FC = () => {
                         periodLabel={`Periode Aktif: ${activeDateRangeText}`}
                       />
 
+                      {/* Full-Width 4 Strategic Trend Highlight Cards */}
+                      <TrendHighlightsStrip records={fetchResult.records} />
+
                       {/* COINEST Middle Section: Cashflow Trend Chart + Statistic Donut Card */}
-                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch mb-6">
                         <div className="xl:col-span-8">
-                          <PerformanceTrend records={fetchResult.records} />
+                          <PerformanceTrend
+                            records={fetchResult.records}
+                            hideHighlights={true}
+                          />
                         </div>
-                        <div className="xl:col-span-4 mb-6">
+                        <div className="xl:col-span-4">
                           <ChannelShareDonut
                             records={fetchResult.records}
                             onSelectChannel={setSelectedRecord}
@@ -423,11 +429,17 @@ export const App: React.FC = () => {
                         <strong>Analisis Mendalam:</strong> Silakan telaah dinamika pergerakan belanja iklan, pendapatan GMV, serta fluktuasi ROAS harian lintas kanal. Anda dapat beralih antara grafik terpadu dan memeriksa tabel rincian harian hingga per tanggal.
                       </div>
 
-                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                      {/* Full-Width 4 Strategic Trend Highlight Cards */}
+                      <TrendHighlightsStrip records={fetchResult.records} />
+
+                      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch mb-6">
                         <div className="xl:col-span-8">
-                          <PerformanceTrend records={fetchResult.records} />
+                          <PerformanceTrend
+                            records={fetchResult.records}
+                            hideHighlights={true}
+                          />
                         </div>
-                        <div className="xl:col-span-4 mb-6">
+                        <div className="xl:col-span-4">
                           <ChannelShareDonut
                             records={fetchResult.records}
                             onSelectChannel={setSelectedRecord}
