@@ -41,7 +41,7 @@ async function run() {
 
   // 1. Tab 1: Ringkasan Eksekutif (Desktop 1920x1080)
   {
-    console.log('Capturing Tab 1: Ringkasan Eksekutif...');
+    console.log('Capturing Tab 1: Ringkasan Eksekutif (1920x1080)...');
     const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
     const page = await context.newPage();
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
@@ -50,6 +50,17 @@ async function run() {
     await helpBtn.hover();
     await page.waitForTimeout(300);
     await saveScreenshot(page, 'desktop-1920x1080.png', { fullPage: true });
+    await context.close();
+  }
+
+  // 1b. Tab 1 on Laptop 1366x768 (Viewport view)
+  {
+    console.log('Capturing Tab 1: Ringkasan Eksekutif (Laptop 1366x768)...');
+    const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    const page = await context.newPage();
+    await page.goto(serverUrl, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1000);
+    await saveScreenshot(page, 'laptop-1366x768.png', { fullPage: false });
     await context.close();
   }
 
@@ -67,7 +78,7 @@ async function run() {
     await barSlot.hover();
     await page.waitForTimeout(400);
     await saveScreenshot(page, 'tab-analytics.png', { fullPage: true });
-    await saveScreenshot(page, 'laptop-1366x768.png', { fullPage: false });
+    await saveScreenshot(page, 'tab-analytics-laptop.png', { fullPage: false });
     await context.close();
   }
 

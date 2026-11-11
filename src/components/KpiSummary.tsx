@@ -37,6 +37,7 @@ interface KpiCardItem {
   targetLabel?: string;
   targetValue?: string | null;
   achievementText?: string | null;
+  achievementTooltip?: string | null;
   achievementStatus?: 'success' | 'warning' | 'info' | 'neutral';
 }
 
@@ -66,7 +67,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       subtitle: isPartial ? 'Belanja iklan terverifikasi' : 'Total biaya iklan',
       tooltip:
         'Akumulasi pengeluaran iklan aktual dari kanal dengan status terverifikasi. Tidak menghitung kanal bermasalah sebagai Rp 0.',
-      icon: <Wallet className="w-4 h-4" />,
+      icon: <Wallet className="w-3.5 h-3.5" />,
       hasWarning: isPartial,
       targetLabel: 'Target Budget',
       targetValue:
@@ -75,7 +76,11 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
           : null,
       achievementText:
         metrics.spendAchievementPct !== null
-          ? `${formatRatioPercent(metrics.spendAchievementPct)} budget`
+          ? formatRatioPercent(metrics.spendAchievementPct)
+          : null,
+      achievementTooltip:
+        metrics.spendAchievementPct !== null
+          ? `${formatRatioPercent(metrics.spendAchievementPct)} dari target budget`
           : null,
       achievementStatus:
         metrics.spendAchievementPct !== null
@@ -93,7 +98,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       subtitle: 'Gross Merchandise Value',
       tooltip:
         'Realisasi pendapatan penjualan kotor yang diatribusikan ke iklan berbayar sesuai model atribusi platform masing-masing.',
-      icon: <TrendingUp className="w-4 h-4" />,
+      icon: <TrendingUp className="w-3.5 h-3.5" />,
       hasWarning: isPartial,
       targetLabel: 'Target GMV',
       targetValue:
@@ -102,7 +107,11 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
           : null,
       achievementText:
         metrics.revenueAchievementPct !== null
-          ? `${formatRatioPercent(metrics.revenueAchievementPct)} tercapai`
+          ? formatRatioPercent(metrics.revenueAchievementPct)
+          : null,
+      achievementTooltip:
+        metrics.revenueAchievementPct !== null
+          ? `${formatRatioPercent(metrics.revenueAchievementPct)} dari target GMV tercapai`
           : null,
       achievementStatus:
         metrics.revenueAchievementPct !== null
@@ -120,7 +129,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       subtitle: 'SUM(GMV) / SUM(Spend)',
       tooltip:
         'Pengembalian riil belanja iklan terpadu (Total GMV / Total Spend). Bukan rata-rata angka ROAS masing-masing baris.',
-      icon: <Sparkles className="w-4 h-4" />,
+      icon: <Sparkles className="w-3.5 h-3.5" />,
       targetLabel: 'Target ROAS',
       targetValue:
         metrics.targetBlendedRoas !== null
@@ -128,7 +137,11 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
           : null,
       achievementText:
         roasDiff !== null
-          ? `${roasDiff >= 0 ? '+' : ''}${roasDiff.toFixed(2)}x vs target`
+          ? `${roasDiff >= 0 ? '+' : ''}${roasDiff.toFixed(2)}x`
+          : null,
+      achievementTooltip:
+        roasDiff !== null
+          ? `${roasDiff >= 0 ? '+' : ''}${roasDiff.toFixed(2)}x vs target ROAS`
           : null,
       achievementStatus:
         roasDiff !== null
@@ -146,7 +159,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       subtitle: 'Volume pesanan berbayar',
       tooltip:
         'Total volume pesanan berbayar yang dihasilkan langsung melalui kampanye iklan berbayar.',
-      icon: <ShoppingBag className="w-4 h-4" />,
+      icon: <ShoppingBag className="w-3.5 h-3.5" />,
       hasWarning: isPartial,
       targetLabel: 'Target Orders',
       targetValue:
@@ -155,7 +168,11 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
           : null,
       achievementText:
         metrics.ordersAchievementPct !== null
-          ? `${formatRatioPercent(metrics.ordersAchievementPct)} tercapai`
+          ? formatRatioPercent(metrics.ordersAchievementPct)
+          : null,
+      achievementTooltip:
+        metrics.ordersAchievementPct !== null
+          ? `${formatRatioPercent(metrics.ordersAchievementPct)} dari target orders tercapai`
           : null,
       achievementStatus:
         metrics.ordersAchievementPct !== null
@@ -173,7 +190,7 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       subtitle: 'Biaya akuisisi per pesanan',
       tooltip:
         'Rata-rata biaya belanja iklan untuk setiap pesanan berbayar (Total Spend / Total Paid Orders).',
-      icon: <Coins className="w-4 h-4" />,
+      icon: <Coins className="w-3.5 h-3.5" />,
       targetLabel: 'Target CPO',
       targetValue:
         metrics.targetSpendPerOrder !== null
@@ -182,10 +199,18 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       achievementText:
         metrics.spendPerOrder !== null && metrics.targetSpendPerOrder !== null
           ? metrics.spendPerOrder <= metrics.targetSpendPerOrder
-            ? 'Efisien (di bawah target)'
+            ? 'Efisien'
             : `+${formatRatioPercent(
                 (metrics.spendPerOrder / metrics.targetSpendPerOrder - 1) * 100
-              )} CPO`
+              )}`
+          : null,
+      achievementTooltip:
+        metrics.spendPerOrder !== null && metrics.targetSpendPerOrder !== null
+          ? metrics.spendPerOrder <= metrics.targetSpendPerOrder
+            ? 'Biaya akuisisi lebih efisien dari target CPO'
+            : `Biaya akuisisi +${formatRatioPercent(
+                (metrics.spendPerOrder / metrics.targetSpendPerOrder - 1) * 100
+              )} di atas target CPO`
           : null,
       achievementStatus:
         metrics.spendPerOrder !== null && metrics.targetSpendPerOrder !== null
@@ -201,11 +226,15 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
       subtitle: `${metrics.validRecordsCount} dari ${metrics.totalExpectedRecordsCount} slot data terverifikasi`,
       tooltip:
         'Rasio kelengkapan data aktual dari seluruh kanal dan tanggal penarikan yang diharapkan.',
-      icon: <ShieldCheck className="w-4 h-4" />,
+      icon: <ShieldCheck className="w-3.5 h-3.5" />,
       hasWarning: metrics.dataCoverage < 1,
       targetLabel: 'Target SLA',
       targetValue: '100% (4 Kanal)',
-      achievementText: metrics.dataCoverage === 1 ? '100% lengkap' : 'Parsial',
+      achievementText: metrics.dataCoverage === 1 ? '100%' : 'Parsial',
+      achievementTooltip:
+        metrics.dataCoverage === 1
+          ? '100% data lengkap dan terverifikasi'
+          : 'Sebagian data kanal belum terverifikasi',
       achievementStatus: metrics.dataCoverage === 1 ? 'success' : 'warning',
     },
   ];
@@ -314,143 +343,136 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
         </div>
       </div>
 
-      {/* 3-Column spacious grid (2 rows of 3) styled in COINEST White Card Aesthetic */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+      {/* 6-Column Compact Grid (Option 1: 1 horizontal row on desktop xl) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-2.5 2xl:gap-3">
         {cards.map((card) => {
           const isTooltipOpen =
             activeTooltip === card.id || activeTooltip === `${card.id}-warn`;
           return (
             <div
               key={card.id}
-              className={`relative bg-white rounded-xl border p-3.5 sm:p-4 shadow-card transition-all hover:shadow-card-hover flex flex-col justify-between overflow-visible ${
+              className={`relative bg-white rounded-xl border p-2.5 2xl:p-3 shadow-card transition-all hover:shadow-card-hover flex flex-col justify-between overflow-visible min-h-[88px] sm:min-h-[92px] ${
                 isTooltipOpen ? 'z-30' : 'z-10'
               } ${card.hasWarning ? 'border-amber-200/90' : 'border-[#E2EBE0]'}`}
             >
               <div>
-                {/* Top Icon Box + Achievement Pill & Tooltip (COINEST style) */}
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
-                    {card.icon}
-                  </div>
+                {/* Header: Icon + Title + Tooltips */}
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-5 h-5 rounded-md bg-[#EAF2E8] text-[#133326] flex items-center justify-center shrink-0">
+                      {card.icon}
+                    </div>
+                    <span
+                      className="text-2xs font-bold text-slate-700 truncate"
+                      title={card.label}
+                    >
+                      {card.label}
+                    </span>
 
-                  <div className="flex items-center gap-1.5">
-                    {card.achievementText && (
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-3xs font-bold shrink-0 ${
-                          card.achievementStatus === 'success'
-                            ? 'bg-[#D7F7C4] text-[#133326]'
-                            : card.achievementStatus === 'warning'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-[#EAF2E8] text-[#1E4A38]'
-                        }`}
-                      >
-                        {card.achievementText}
-                      </span>
+                    {card.hasWarning && (
+                      <div className="relative inline-block shrink-0">
+                        <button
+                          type="button"
+                          aria-label={`Peringatan data parsial untuk ${card.label}`}
+                          onMouseEnter={() => setActiveTooltip(`${card.id}-warn`)}
+                          onMouseLeave={() => setActiveTooltip(null)}
+                          onClick={() =>
+                            setActiveTooltip(
+                              activeTooltip === `${card.id}-warn` ? null : `${card.id}-warn`
+                            )
+                          }
+                          className="p-0.5 rounded text-amber-500 hover:text-amber-600 hover:bg-amber-50 focus:outline-none transition-colors"
+                        >
+                          <AlertCircle className="w-3 h-3" />
+                        </button>
+                        {activeTooltip === `${card.id}-warn` && (
+                          <div
+                            role="tooltip"
+                            className="absolute z-50 bottom-full left-0 mb-1.5 w-56 p-2.5 bg-[#133326] text-white text-xs rounded-xl shadow-2xl border border-amber-400/40 leading-relaxed pointer-events-none"
+                          >
+                            <div className="text-2xs font-extrabold uppercase tracking-wider text-amber-300 mb-0.5">
+                              Data Parsial
+                            </div>
+                            <div className="text-emerald-50/95 font-normal text-3xs">
+                              Sebagian kanal belum terverifikasi pada periode ini. Angka hanya menjumlahkan kanal dengan data valid.
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
+                  </div>
 
-                    <div className="relative inline-block flex-shrink-0">
-                      <button
-                        type="button"
-                        aria-label={`Informasi untuk ${card.label}`}
-                        onClick={() =>
-                          setActiveTooltip(activeTooltip === card.id ? null : card.id)
-                        }
-                        onMouseEnter={() => setActiveTooltip(card.id)}
-                        onMouseLeave={() => setActiveTooltip(null)}
-                        onFocus={() => setActiveTooltip(card.id)}
-                        onBlur={() => setActiveTooltip(null)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-[#133326] hover:bg-[#EAF2E8] focus:outline-none transition-colors"
+                  <div className="relative inline-block shrink-0">
+                    <button
+                      type="button"
+                      aria-label={`Informasi untuk ${card.label}`}
+                      onClick={() =>
+                        setActiveTooltip(activeTooltip === card.id ? null : card.id)
+                      }
+                      onMouseEnter={() => setActiveTooltip(card.id)}
+                      onMouseLeave={() => setActiveTooltip(null)}
+                      className="p-0.5 rounded text-slate-400 hover:text-[#133326] hover:bg-[#EAF2E8] focus:outline-none transition-colors"
+                    >
+                      <HelpCircle className="w-3 h-3" />
+                    </button>
+
+                    {activeTooltip === card.id && (
+                      <div
+                        role="tooltip"
+                        className="absolute z-50 top-full right-0 mt-1.5 w-60 p-3 bg-[#133326] text-white text-xs rounded-xl shadow-2xl border border-[#2C5E4A] leading-relaxed pointer-events-none"
                       >
-                        <HelpCircle className="w-3.5 h-3.5" />
-                      </button>
-
-                      {activeTooltip === card.id && (
-                        <div
-                          role="tooltip"
-                          className="absolute z-40 top-full right-0 mt-2 w-64 p-3.5 bg-[#133326] text-white text-xs rounded-xl shadow-2xl border border-[#2C5E4A] leading-relaxed pointer-events-none"
-                        >
-                          <div className="text-2xs font-extrabold uppercase tracking-wider text-[#A7E97F] mb-1">
-                            {card.label}
-                          </div>
-                          <div className="text-emerald-50/95 font-normal">
-                            {card.tooltip}
-                          </div>
+                        <div className="text-2xs font-extrabold uppercase tracking-wider text-[#A7E97F] mb-1">
+                          {card.label}
                         </div>
-                      )}
-                    </div>
+                        <div className="text-emerald-50/95 font-normal text-3xs mb-1.5">
+                          {card.tooltip}
+                        </div>
+                        {card.subtitle && (
+                          <div className="pt-1.5 border-t border-[#1E4A38] text-3xs text-emerald-200/75 font-mono">
+                            {card.subtitle}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Metric Value: Full unclipped number */}
-                <div
-                  className="text-xl sm:text-2xl font-extrabold text-[#133326] tracking-tight font-sans tabular-nums py-0 select-all"
-                  title={card.value}
-                >
-                  {card.value}
-                </div>
+                {/* Metric Value & Performance Badge */}
+                <div className="flex items-baseline justify-between gap-1 my-0.5">
+                  <div
+                    className="text-sm sm:text-[15px] xl:text-[14px] 2xl:text-base font-black text-[#133326] tracking-tight font-sans tabular-nums select-all truncate"
+                    title={`${card.label}: ${card.value}`}
+                  >
+                    {card.value}
+                  </div>
 
-                {/* Metric Title Label below value (matching COINEST card hierarchy) */}
-                <div className="flex items-center justify-between gap-1 mt-0.5">
-                  <span className="text-xs font-bold text-slate-600">
-                    {card.label}
-                  </span>
-                  {card.hasWarning && (
-                    <div className="relative inline-block flex-shrink-0">
-                      <button
-                        type="button"
-                        aria-label={`Peringatan data parsial untuk ${card.label}`}
-                        onMouseEnter={() => setActiveTooltip(`${card.id}-warn`)}
-                        onMouseLeave={() => setActiveTooltip(null)}
-                        onFocus={() => setActiveTooltip(`${card.id}-warn`)}
-                        onBlur={() => setActiveTooltip(null)}
-                        className="p-0.5 rounded text-amber-600 hover:bg-amber-50 focus:outline-none"
-                      >
-                        <AlertCircle className="w-3.5 h-3.5" />
-                      </button>
-                      {activeTooltip === `${card.id}-warn` && (
-                        <div
-                          role="tooltip"
-                          className="absolute z-40 bottom-full right-0 mb-2 w-60 p-3 bg-[#133326] text-white text-xs rounded-xl shadow-2xl border border-amber-400/40 leading-relaxed pointer-events-none"
-                        >
-                          <div className="text-2xs font-extrabold uppercase tracking-wider text-amber-300 mb-1">
-                            Data Parsial
-                          </div>
-                          <div className="text-emerald-50/95 font-normal">
-                            Sebagian kanal belum terverifikasi pada periode ini. Angka hanya menjumlahkan kanal dengan data valid.
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                  {card.achievementText && (
+                    <span
+                      className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-3xs font-extrabold shrink-0 whitespace-nowrap ${
+                        card.achievementStatus === 'success'
+                          ? 'bg-[#D7F7C4] text-[#133326]'
+                          : card.achievementStatus === 'warning'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-[#EAF2E8] text-[#1E4A38]'
+                      }`}
+                      title={card.achievementTooltip || card.achievementText}
+                    >
+                      {card.achievementText}
+                    </span>
                   )}
                 </div>
-
-                {/* Target Comparison Row */}
-                {card.targetValue ? (
-                  <div className="mt-2.5 flex items-center justify-between gap-1.5 bg-[#F6F9F5] rounded-lg px-2.5 py-1.5 border border-[#E2EBE0] text-2xs">
-                    <div className="flex items-center gap-1.5 truncate text-slate-600">
-                      <Target className="w-3 h-3 text-[#133326] flex-shrink-0" />
-                      <span className="font-medium text-slate-500">
-                        {card.targetLabel}:
-                      </span>
-                    </div>
-                    <span className="font-mono font-bold text-[#133326] tabular-nums truncate">
-                      {card.targetValue}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="mt-2.5 flex items-center gap-1.5 text-2xs text-slate-400 bg-[#F6F9F5] rounded-lg px-2.5 py-1.5 border border-[#E2EBE0]">
-                    <Target className="w-3 h-3 text-slate-300" />
-                    <span>
-                      Target: <em className="not-italic text-slate-500">Belum diatur</em>
-                    </span>
-                  </div>
-                )}
               </div>
 
-              {/* Subtitle Footer */}
-              <div className="mt-2 pt-1.5 border-t border-[#ECF2EB] flex items-center justify-between text-3xs text-slate-400">
-                <span className="truncate pr-1" title={card.subtitle}>
-                  {card.subtitle}
+              {/* Inline Target Subline (High-density, replaces bulky grey box) */}
+              <div className="pt-1 mt-1 border-t border-[#ECF2EB] flex items-center justify-between text-3xs font-mono text-slate-500">
+                <div className="flex items-center gap-1 min-w-0 text-slate-400">
+                  <Target className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                  <span className="font-sans truncate">
+                    {card.targetLabel ? card.targetLabel.replace('Target ', 'Tgt ') : 'Target'}:
+                  </span>
+                </div>
+                <span className="font-bold text-[#133326] tabular-nums truncate ml-1 shrink-0">
+                  {card.targetValue ? card.targetValue : '—'}
                 </span>
               </div>
             </div>
