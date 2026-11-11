@@ -324,7 +324,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
       {/* Calendar Dropdown Modal / Popup */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 z-40 bg-white rounded-2xl shadow-2xl border border-[#DCE8DA] overflow-hidden w-[340px] sm:w-[620px] transition-all">
+        <div className="absolute left-0 lg:left-auto lg:right-0 mt-2 z-40 bg-white rounded-2xl shadow-2xl border border-[#DCE8DA] overflow-hidden w-[330px] sm:w-[560px] transition-all">
           {/* Header Modal */}
           <div className="px-4 py-3 bg-[#133326] text-white flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -344,7 +344,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
           <div className="flex flex-col sm:flex-row">
             {/* Left Column: Preset Shortcuts */}
-            <div className="w-full sm:w-52 bg-[#F6F9F5] p-3 border-b sm:border-b-0 sm:border-r border-[#E2EBE0] space-y-1">
+            <div className="w-full sm:w-48 bg-[#F6F9F5] p-3 border-b sm:border-b-0 sm:border-r border-[#E2EBE0] space-y-1">
               <div className="text-3xs font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
                 Preset Cepat
               </div>
