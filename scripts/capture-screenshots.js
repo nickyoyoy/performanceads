@@ -46,7 +46,7 @@ async function run() {
     const page = await context.newPage();
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
-    await saveScreenshot(page, 'desktop-1920x1080.png', { fullPage: false });
+    await saveScreenshot(page, 'desktop-1920x1080.png', { fullPage: true });
     await context.close();
   }
 

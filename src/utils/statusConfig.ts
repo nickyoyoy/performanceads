@@ -12,10 +12,10 @@ export interface StatusMeta {
 export const STATUS_CONFIG: Record<AdsDataStatus, StatusMeta> = {
   verified: {
     label: 'Terverifikasi',
-    badgeBg: 'bg-emerald-50',
-    badgeText: 'text-emerald-700',
-    badgeBorder: 'border-emerald-200',
-    dotColor: 'bg-emerald-500',
+    badgeBg: 'bg-[#D7F7C4]',
+    badgeText: 'text-[#133326]',
+    badgeBorder: 'border-[#B9EB9B]',
+    dotColor: 'bg-[#133326]',
     description: 'Data aktual berhasil ditarik dan terverifikasi dari sumber API/dasbor.',
   },
   partial: {

@@ -20,8 +20,18 @@ interface DateRangePickerProps {
 }
 
 const MONTH_NAMES = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
 ];
 
 const DAY_NAMES = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
@@ -67,7 +77,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   // Click outside listener to close dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -86,7 +99,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   // Calendar grid calculation for viewYear and viewMonth
   const calendarDays = useMemo(() => {
     const firstDay = new Date(viewYear, viewMonth, 1);
-    // Convert Sunday=0 to Monday=0: (day + 6) % 7
     const startingDayOfWeek = (firstDay.getDay() + 6) % 7;
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
@@ -97,7 +109,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       hasData: boolean;
     }> = [];
 
-    // Empty padding slots for days before start of month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push({
         dateStr: '',
@@ -107,7 +118,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       });
     }
 
-    // Days in current month
     for (let d = 1; d <= daysInMonth; d++) {
       const mm = String(viewMonth + 1).padStart(2, '0');
       const dd = String(d).padStart(2, '0');
@@ -148,21 +158,17 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
     setTempPreset('custom');
 
-    // Case 1: No start date chosen yet, or both start & end already chosen -> restart with new start
     if (!tempStart || (tempStart && tempEnd)) {
       setTempStart(dateStr);
       setTempEnd(null);
       return;
     }
 
-    // Case 2: Start is chosen, end is not chosen yet
     if (tempStart && !tempEnd) {
       if (dateStr < tempStart) {
-        // If clicked date is earlier than start date, make it the new start date
         setTempStart(dateStr);
         setTempEnd(null);
       } else {
-        // Range completed
         setTempEnd(dateStr);
       }
     }
@@ -176,7 +182,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       if (availableDates.length > 0) {
         setTempStart(availableDates[0]);
         setTempEnd(availableDates[availableDates.length - 1]);
-        const [y, m] = availableDates[availableDates.length - 1].split('-').map(Number);
+        const [y, m] = availableDates[availableDates.length - 1]
+          .split('-')
+          .map(Number);
         setViewYear(y);
         setViewMonth(m - 1);
       } else {
@@ -236,7 +244,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setIsOpen(false);
   };
 
-  // Reset to default 30d
   const handleReset = () => {
     handleSelectPreset('30d');
   };
@@ -245,27 +252,36 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const getDayStyle = (dateStr: string) => {
     if (!dateStr) return '';
 
-    const effectiveEnd = tempEnd || (tempStart && hoveredDate && hoveredDate > tempStart ? hoveredDate : tempStart);
+    const effectiveEnd =
+      tempEnd ||
+      (tempStart && hoveredDate && hoveredDate > tempStart
+        ? hoveredDate
+        : tempStart);
 
     const isStart = tempStart === dateStr;
     const isEnd = tempEnd === dateStr;
     const isInRange =
-      tempStart && effectiveEnd && dateStr > tempStart && dateStr < effectiveEnd;
+      tempStart &&
+      effectiveEnd &&
+      dateStr > tempStart &&
+      dateStr < effectiveEnd;
 
-    let classes = 'relative flex items-center justify-center text-xs h-8 w-8 mx-auto rounded-full transition-all cursor-pointer ';
+    let classes =
+      'relative flex items-center justify-center text-xs h-8 w-8 mx-auto rounded-full transition-all cursor-pointer ';
 
     if (isStart || isEnd) {
-      classes += 'bg-blue-600 text-white font-bold shadow-xs hover:bg-blue-700 ';
+      classes +=
+        'bg-[#133326] text-white font-bold shadow-xs hover:bg-[#1E4A38] ';
     } else if (isInRange) {
-      classes += 'bg-blue-100 text-blue-900 font-medium rounded-none first:rounded-l-full last:rounded-r-full hover:bg-blue-200 ';
+      classes +=
+        'bg-[#D7F7C4] text-[#133326] font-semibold rounded-none first:rounded-l-full last:rounded-r-full hover:bg-[#A7E97F] ';
     } else {
-      classes += 'text-slate-700 hover:bg-slate-100 ';
+      classes += 'text-slate-700 hover:bg-[#EAF2E8] ';
     }
 
     return classes;
   };
 
-  // Label to display on trigger button
   const triggerLabel = useMemo(() => {
     if (datePreset === 'custom' && startDate && endDate) {
       if (startDate === endDate) return formatDateWIB(startDate);
@@ -289,18 +305,18 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Pilih rentang tanggal dan periode"
         aria-expanded={isOpen}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-md border transition-all ${
+        className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all ${
           isOpen || datePreset === 'custom'
-            ? 'bg-blue-50 text-blue-800 border-blue-300 ring-2 ring-blue-100 shadow-2xs'
-            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 shadow-2xs'
+            ? 'bg-[#D7F7C4] text-[#133326] border-[#94E169] ring-2 ring-[#E5F8D8] shadow-2xs'
+            : 'bg-white text-[#133326] border-[#DCE8DA] hover:bg-[#F6F9F5] shadow-2xs'
         }`}
       >
-        <CalendarIcon className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-        <span className="font-mono text-slate-900 font-medium truncate max-w-[220px]">
+        <CalendarIcon className="w-3.5 h-3.5 text-[#133326] flex-shrink-0" />
+        <span className="font-mono text-[#133326] font-semibold truncate max-w-[220px]">
           {triggerLabel}
         </span>
         {datePreset === 'custom' && (
-          <span className="px-1.5 py-0.2 text-3xs font-bold uppercase tracking-wider bg-blue-600 text-white rounded">
+          <span className="px-2 py-0.5 text-3xs font-bold uppercase tracking-wider bg-[#133326] text-white rounded-full">
             Kustom
           </span>
         )}
@@ -308,11 +324,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
       {/* Calendar Dropdown Modal / Popup */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 z-40 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden w-[340px] sm:w-[620px] transition-all">
+        <div className="absolute left-0 mt-2 z-40 bg-white rounded-2xl shadow-2xl border border-[#DCE8DA] overflow-hidden w-[340px] sm:w-[620px] transition-all">
           {/* Header Modal */}
-          <div className="px-4 py-3 bg-slate-900 text-white flex items-center justify-between">
+          <div className="px-4 py-3 bg-[#133326] text-white flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-sky-400" />
+              <CalendarIcon className="w-4 h-4 text-[#A7E97F]" />
               <span className="text-xs font-bold uppercase tracking-wider">
                 Pilih Periode & Kalender Rentang Tanggal
               </span>
@@ -320,7 +336,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
+              className="text-emerald-200 hover:text-white p-1 rounded-lg transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -328,7 +344,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
           <div className="flex flex-col sm:flex-row">
             {/* Left Column: Preset Shortcuts */}
-            <div className="w-full sm:w-48 bg-slate-50/80 p-3 border-b sm:border-b-0 sm:border-r border-slate-200 space-y-1">
+            <div className="w-full sm:w-52 bg-[#F6F9F5] p-3 border-b sm:border-b-0 sm:border-r border-[#E2EBE0] space-y-1">
               <div className="text-3xs font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
                 Preset Cepat
               </div>
@@ -338,21 +354,24 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 { id: '7d' as DatePreset, label: '7 Hari Terakhir' },
                 { id: 'mtd' as DatePreset, label: 'November 2026 (MTD)' },
                 { id: 'prev_month' as DatePreset, label: 'Oktober 2026' },
-                { id: 'all' as DatePreset, label: `Semua Data (${availableDates.length} Hari)` },
+                {
+                  id: 'all' as DatePreset,
+                  label: `Semua Data (${availableDates.length} Hari)`,
+                },
                 { id: '2026-11-09' as DatePreset, label: '9 Nov (Data Awal)' },
                 { id: '2026-11-10' as DatePreset, label: '10 Nov (Hari Ini)' },
                 { id: 'custom' as DatePreset, label: '🗓️ Kustom Tanggal...' },
-              ].map(preset => {
+              ].map((preset) => {
                 const isSelected = tempPreset === preset.id;
                 return (
                   <button
                     key={preset.id}
                     type="button"
                     onClick={() => handleSelectPreset(preset.id)}
-                    className={`w-full text-left px-2.5 py-1.5 text-xs rounded-md font-medium transition-all flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-1.5 text-xs rounded-full font-semibold transition-all flex items-center justify-between ${
                       isSelected
-                        ? 'bg-blue-600 text-white font-semibold shadow-xs'
-                        : 'text-slate-700 hover:bg-slate-200/70'
+                        ? 'bg-[#A7E97F] text-[#133326] font-bold shadow-2xs'
+                        : 'text-slate-700 hover:bg-[#EAF2E8]'
                     }`}
                   >
                     <span>{preset.label}</span>
@@ -370,12 +389,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   type="button"
                   onClick={handlePrevMonth}
                   aria-label="Bulan sebelumnya"
-                  className="p-1 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-[#133326] hover:bg-[#EAF2E8] transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
 
-                <div className="text-xs font-bold text-slate-900 font-sans">
+                <div className="text-xs font-extrabold text-[#133326] font-sans">
                   {MONTH_NAMES[viewMonth]} {viewYear}
                 </div>
 
@@ -383,7 +402,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   type="button"
                   onClick={handleNextMonth}
                   aria-label="Bulan berikutnya"
-                  className="p-1 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-[#133326] hover:bg-[#EAF2E8] transition-colors"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -391,8 +410,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
               {/* Days Header */}
               <div className="grid grid-cols-7 gap-1 text-center mb-1">
-                {DAY_NAMES.map(day => (
-                  <div key={day} className="text-3xs font-bold text-slate-400 py-1">
+                {DAY_NAMES.map((day) => (
+                  <div
+                    key={day}
+                    className="text-3xs font-bold text-slate-400 py-1"
+                  >
                     {day}
                   </div>
                 ))}
@@ -409,17 +431,21 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     <div
                       key={cell.dateStr}
                       onClick={() => handleDateClick(cell.dateStr)}
-                      onMouseEnter={() => tempStart && !tempEnd && setHoveredDate(cell.dateStr)}
+                      onMouseEnter={() =>
+                        tempStart && !tempEnd && setHoveredDate(cell.dateStr)
+                      }
                       className={getDayStyle(cell.dateStr)}
-                      title={`${cell.dateStr}${cell.hasData ? ' (Data tersedia)' : ''}`}
+                      title={`${cell.dateStr}${
+                        cell.hasData ? ' (Data tersedia)' : ''
+                      }`}
                     >
                       <span>{cell.dayNumber}</span>
                       {cell.hasData && (
                         <span
                           className={`absolute bottom-0.5 w-1 h-1 rounded-full ${
                             tempStart === cell.dateStr || tempEnd === cell.dateStr
-                              ? 'bg-white'
-                              : 'bg-blue-600'
+                              ? 'bg-[#A7E97F]'
+                              : 'bg-[#133326]'
                           }`}
                         />
                       )}
@@ -429,7 +455,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               </div>
 
               {/* Manual Date Input Fields */}
-              <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+              <div className="mt-4 pt-3 border-t border-[#ECF2EB] grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <label className="text-3xs font-semibold text-slate-500 uppercase block mb-0.5">
                     Tanggal Awal (Dari):
@@ -437,11 +463,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <input
                     type="date"
                     value={tempStart || ''}
-                    onChange={e => {
+                    onChange={(e) => {
                       setTempPreset('custom');
                       setTempStart(e.target.value || null);
                     }}
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full bg-[#F6F9F5] border border-[#DCE8DA] rounded-lg px-2 py-1 text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-[#133326]"
                   />
                 </div>
                 <div>
@@ -451,11 +477,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <input
                     type="date"
                     value={tempEnd || tempStart || ''}
-                    onChange={e => {
+                    onChange={(e) => {
                       setTempPreset('custom');
                       setTempEnd(e.target.value || null);
                     }}
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full bg-[#F6F9F5] border border-[#DCE8DA] rounded-lg px-2 py-1 text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-[#133326]"
                   />
                 </div>
               </div>
@@ -463,11 +489,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           </div>
 
           {/* Footer Controls: Batal & Terapkan */}
-          <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+          <div className="px-4 py-3 bg-[#F6F9F5] border-t border-[#E2EBE0] flex items-center justify-between text-xs">
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-800 transition-colors"
+              className="inline-flex items-center gap-1 text-slate-500 hover:text-[#133326] font-semibold transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset (30 Hari)</span>
@@ -477,16 +503,16 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-md transition-colors"
+                className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-[#133326] bg-white border border-[#DCE8DA] rounded-full transition-colors"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleApply}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-xs transition-colors flex items-center gap-1.5"
+                className="px-4 py-1.5 text-xs font-bold text-white bg-[#133326] hover:bg-[#1E4A38] rounded-full shadow-xs transition-colors flex items-center gap-1.5"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5 text-[#A7E97F]" />
                 <span>Terapkan Rentang</span>
               </button>
             </div>

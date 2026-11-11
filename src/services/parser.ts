@@ -139,7 +139,12 @@ export function mapStatus(rawStatusStr: string | null, issueNotesStr: string | n
   if (lowerStatus.includes('partial') || lowerStatus.includes('sebagian')) {
     return { status: 'partial', rawStatus };
   }
-  if (lowerStatus.includes('pending') || lowerStatus.includes('menunggu')) {
+  if (
+    lowerStatus.includes('pending') ||
+    lowerStatus.includes('menunggu') ||
+    lowerStatus.includes('belum ditarik') ||
+    lowerStatus.includes('scheduled')
+  ) {
     return { status: 'pending', rawStatus };
   }
   if (lowerStatus.includes('stale') || lowerStatus.includes('kadaluarsa')) {
