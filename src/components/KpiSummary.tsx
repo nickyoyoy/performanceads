@@ -256,43 +256,59 @@ export const KpiSummary: React.FC<KpiSummaryProps> = ({ metrics, periodLabel }) 
             </div>
           </div>
 
-          {/* Right: Key Balance Metrics (Spend, Blended ROAS, Target ROAS, Paid Orders) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
-            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10">
-              <span className="text-3xs uppercase tracking-wider text-emerald-100/70 block">
+          {/* Right: Key Balance Metrics in a Balanced 2x2 Grid (Zero Overflow, Perfect Symmetry) */}
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-[430px] xl:w-[470px] shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
+            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+              <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Total Spend
               </span>
-              <span className="text-sm sm:text-base font-bold text-white tabular-nums mt-0.5 block">
+              <span className="text-base sm:text-lg font-extrabold text-white tabular-nums mt-1 block whitespace-nowrap">
                 {formatCurrencyIDR(metrics.totalSpend)}
               </span>
             </div>
 
-            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10">
-              <span className="text-3xs uppercase tracking-wider text-emerald-100/70 block">
+            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+              <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Blended ROAS
               </span>
-              <span className="text-sm sm:text-base font-extrabold text-[#A7E97F] tabular-nums mt-0.5 block">
-                {formatRoas(metrics.blendedRoas)}
-              </span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-base sm:text-lg font-extrabold text-[#A7E97F] tabular-nums whitespace-nowrap">
+                  {formatRoas(metrics.blendedRoas)}
+                </span>
+                {metrics.targetBlendedRoas !== null && (
+                  <span className="text-3xs text-emerald-100/60 font-mono whitespace-nowrap">
+                    / Tgt {formatRoas(metrics.targetBlendedRoas)}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10">
-              <span className="text-3xs uppercase tracking-wider text-emerald-100/70 block">
+            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+              <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Paid Orders
               </span>
-              <span className="text-sm sm:text-base font-bold text-white tabular-nums mt-0.5 block">
-                {formatNumber(metrics.totalOrders)}
-              </span>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-base sm:text-lg font-extrabold text-white tabular-nums whitespace-nowrap">
+                  {formatNumber(metrics.totalOrders)}
+                </span>
+                <span className="text-3xs text-emerald-100/60 font-medium whitespace-nowrap">
+                  pesanan
+                </span>
+              </div>
             </div>
 
-            <div className="bg-white/5 rounded-xl px-3.5 py-2.5 border border-white/10">
-              <span className="text-3xs uppercase tracking-wider text-emerald-100/70 block">
+            <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10 flex flex-col justify-between">
+              <span className="text-3xs font-semibold uppercase tracking-wider text-emerald-100/70 block whitespace-nowrap">
                 Data Coverage
               </span>
-              <span className="text-sm sm:text-base font-bold text-[#A7E97F] tabular-nums mt-0.5 block">
-                {formatPercent(metrics.dataCoverage)} ({metrics.validRecordsCount}/
-                {metrics.totalExpectedRecordsCount})
-              </span>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-base sm:text-lg font-extrabold text-[#A7E97F] tabular-nums whitespace-nowrap">
+                  {formatPercent(metrics.dataCoverage)}
+                </span>
+                <span className="text-2xs text-emerald-100/75 font-mono whitespace-nowrap">
+                  ({metrics.validRecordsCount}/{metrics.totalExpectedRecordsCount})
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -166,19 +166,21 @@ export const ChannelShareDonut: React.FC<ChannelShareDonutProps> = ({
     <div className="bg-white rounded-2xl border border-[#E2EBE0] shadow-card p-5 flex flex-col justify-between h-full">
       <div>
         {/* Card Header */}
-        <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#EAF2E8] flex items-center justify-center text-[#133326]">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-[#EAF2E8] flex items-center justify-center text-[#133326] shrink-0">
               <PieChart className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-[#133326] tracking-tight">
+            <div className="min-w-0">
+              <h3 className="text-base font-extrabold text-[#133326] tracking-tight truncate">
                 Statistik Kanal
               </h3>
-              <p className="text-2xs text-slate-500">Distribusi porsi per jenis iklan</p>
+              <p className="text-2xs text-slate-500 truncate">
+                Distribusi porsi per kanal
+              </p>
             </div>
           </div>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-2xs font-semibold bg-[#EAF2E8] text-[#133326]">
+          <span className="inline-flex items-center whitespace-nowrap shrink-0 px-3 py-1 rounded-full text-2xs font-bold bg-[#EAF2E8] text-[#133326]">
             {channelBreakdown.items.length} Kanal
           </span>
         </div>
