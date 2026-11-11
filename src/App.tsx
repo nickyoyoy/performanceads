@@ -21,7 +21,6 @@ import {
   Activity,
   AlertTriangle,
   Database,
-  Layers,
   ShieldCheck,
   RefreshCw,
 } from 'lucide-react';
@@ -254,51 +253,6 @@ export const App: React.FC = () => {
               )}
             </button>
           </nav>
-
-          {/* Secondary Sidebar Section: Quick Channel Filter (Desktop) */}
-          <div className="hidden lg:block space-y-1.5 pt-2 border-t border-[#DCE8DA]">
-            <div className="text-3xs font-bold uppercase tracking-wider text-slate-400 px-3 mb-1">
-              Filter Cepat Kanal
-            </div>
-            <button
-              type="button"
-              onClick={() => setFilters({ ...filters, channel: 'all' })}
-              className={`w-full flex items-center justify-between px-4 py-2 text-xs rounded-full transition-all ${
-                !filters.channel || filters.channel === 'all'
-                  ? 'bg-white text-[#133326] font-bold shadow-2xs border border-[#DCE8DA]'
-                  : 'text-slate-600 font-medium hover:bg-[#DCE8DA]/50'
-              }`}
-            >
-              <span className="flex items-center gap-2.5">
-                <Layers className="w-3.5 h-3.5 text-[#133326]" />
-                <span>Semua Platform</span>
-              </span>
-              <span className="text-3xs font-mono bg-[#EAF2E8] text-[#133326] px-2 py-0.5 rounded-full font-bold">
-                {availableChannels.length}
-              </span>
-            </button>
-
-            {availableChannels.map((ch) => {
-              const isSelected = filters.channel === ch;
-              return (
-                <button
-                  key={ch}
-                  type="button"
-                  onClick={() => setFilters({ ...filters, channel: ch })}
-                  className={`w-full flex items-center justify-between px-4 py-2 text-xs rounded-full transition-all ${
-                    isSelected
-                      ? 'bg-white text-[#133326] font-bold shadow-2xs border border-[#DCE8DA]'
-                      : 'text-slate-600 font-medium hover:bg-[#DCE8DA]/50'
-                  }`}
-                >
-                  <span className="truncate">{ch}</span>
-                  {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-[#133326]" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* Bottom Dark Forest Green Card (COINEST "Get Pro" Card Style) */}
