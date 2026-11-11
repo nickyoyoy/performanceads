@@ -1,8 +1,19 @@
 import React from 'react';
 import { AdsFilters } from '../types/ads';
-import { RefreshCw, RotateCcw, Calendar, Sparkles } from 'lucide-react';
-import { formatDateWIB } from '../utils/formatters';
+import {
+  RefreshCw,
+  RotateCcw,
+  Calendar,
+  Sparkles,
+  LayoutDashboard,
+  TrendingUp,
+  Activity,
+  ShieldCheck,
+} from 'lucide-react';
+import { formatDateWIB, formatPercent } from '../utils/formatters';
 import { DateRangePicker } from './DateRangePicker';
+
+export type MainTab = 'overview' | 'analytics' | 'health';
 
 interface HeaderProps {
   filters: AdsFilters;
@@ -14,6 +25,10 @@ interface HeaderProps {
   availableChannels: string[];
   availableDates: string[];
   activeDateRangeText: string;
+  activeTab: MainTab;
+  onTabChange: (tab: MainTab) => void;
+  issueSourcesCount: number;
+  dataCoverage: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +41,10 @@ export const Header: React.FC<HeaderProps> = ({
   availableChannels,
   availableDates,
   activeDateRangeText,
+  activeTab,
+  onTabChange,
+  issueSourcesCount,
+  dataCoverage,
 }) => {
   const isFilterActive =
     (filters.channel && filters.channel !== 'all') ||
@@ -43,64 +62,132 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-white/90 backdrop-blur-md border-b border-[#E2EBE0] sticky top-0 z-20 lg:rounded-t-3xl">
-      <div className="px-4 sm:px-6 lg:px-8 py-4">
-        {/* Top bar: Title + Live Sync + Profile/Refresh */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#133326] flex items-center justify-center text-[#A7E97F] font-extrabold text-xs tracking-wider shadow-sm flex-shrink-0 lg:hidden">
-              SC
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-[#133326] tracking-tight">
-                  Dashboard Performa Iklan
-                </h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider bg-[#D7F7C4] text-[#133326] rounded-full">
-                  <Sparkles className="w-3 h-3" />
-                  Live Sync
-                </span>
-                {availableDates.length > 1 && (
-                  <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 text-2xs font-bold bg-[#EAF2E8] text-[#133326] rounded-full">
-                    <Calendar className="w-3 h-3" />
-                    {availableDates.length} Hari Terkumpul
-                  </span>
-                )}
+    <header className="bg-white/95 backdrop-blur-md border-b border-[#E2EBE0] sticky top-0 z-30 shadow-2xs">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        {/* Row 1: Brand Logo + Primary Nav Tabs + Actions */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#ECF2EB]">
+          {/* Brand Identity & Mobile Controls */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              {/* Botanical 4-Leaf Clover Emblem */}
+              <div className="w-9 h-9 rounded-2xl bg-[#133326] flex items-center justify-center shadow-sm shrink-0">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-5 h-5 fill-[#A7E97F]"
+                  aria-hidden="true"
+                >
+                  <path d="M7.5 3C5.01 3 3 5.01 3 7.5C3 9.99 5.01 12 7.5 12H11V7.5C11 5.01 8.99 3 7.5 3ZM16.5 3C14.01 3 13 5.01 13 7.5V12H16.5C18.99 12 21 9.99 21 7.5C21 5.01 18.99 3 16.5 3ZM7.5 13C5.01 13 3 15.01 3 17.5C3 19.99 5.01 22 7.5 22C9.99 22 11 19.99 11 17.5V13H7.5ZM13 13V17.5C13 19.99 15.01 22 16.5 22C18.99 22 21 19.99 21 17.5C21 15.01 18.99 13 16.5 13H13Z" />
+                </svg>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Monitoring realisasi, target belanja iklan, dan atribusi pendapatan per kanal — ScentPlus
-              </p>
+              <div>
+                <span className="text-base font-extrabold tracking-tight text-[#133326] block leading-none">
+                  SCENTPLUS
+                </span>
+                <span className="text-3xs font-semibold uppercase tracking-widest text-slate-500 mt-0.5 block">
+                  KPI Ads Suite
+                </span>
+              </div>
             </div>
+
+            {/* Mobile-only Coverage badge */}
+            <span className="lg:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-2xs font-bold bg-[#D7F7C4] text-[#133326]">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {formatPercent(dataCoverage)}
+            </span>
           </div>
 
-          {/* Right action: Last Pull & Refresh (COINEST Top-Right Action Pill Style) */}
-          <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="text-right text-xs text-slate-500 hidden sm:block bg-[#F6F9F5] px-3.5 py-1.5 rounded-full border border-[#E2EBE0]">
-              <span className="text-2xs text-slate-400 mr-1.5">Sync:</span>
-              <span className="font-mono text-[#133326] font-bold">
+          {/* Primary Navigation Tabs (Pill style in botanical sage track) */}
+          <nav
+            aria-label="Navigasi Bagian Dashboard"
+            className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none"
+          >
+            <div className="flex items-center gap-1.5 bg-[#ECF2EB] p-1 rounded-full border border-[#DCE8DA]">
+              <button
+                type="button"
+                onClick={() => onTabChange('overview')}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-full transition-all whitespace-nowrap ${
+                  activeTab === 'overview'
+                    ? 'bg-[#133326] text-[#A7E97F] font-extrabold shadow-sm'
+                    : 'text-[#133326]/75 font-semibold hover:text-[#133326] hover:bg-white/60'
+                }`}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+                <span>Ringkasan Eksekutif</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onTabChange('analytics')}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-full transition-all whitespace-nowrap ${
+                  activeTab === 'analytics'
+                    ? 'bg-[#133326] text-[#A7E97F] font-extrabold shadow-sm'
+                    : 'text-[#133326]/75 font-semibold hover:text-[#133326] hover:bg-white/60'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                <span>Tren & Rincian Kanal</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onTabChange('health')}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs rounded-full transition-all whitespace-nowrap ${
+                  activeTab === 'health'
+                    ? 'bg-[#133326] text-[#A7E97F] font-extrabold shadow-sm'
+                    : 'text-[#133326]/75 font-semibold hover:text-[#133326] hover:bg-white/60'
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5 shrink-0" />
+                <span>Data Health & Integrasi</span>
+                {issueSourcesCount > 0 && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 text-3xs font-extrabold rounded-full bg-rose-500 text-white leading-none">
+                    {issueSourcesCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </nav>
+
+          {/* Right Action: Live Sync Badge + Coverage + Refresh */}
+          <div className="flex items-center gap-2.5 self-end lg:self-center">
+            {/* Desktop Coverage Badge */}
+            <span className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-bold bg-[#EAF2E8] text-[#133326] border border-[#DCE8DA]">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Coverage: <strong>{formatPercent(dataCoverage)}</strong></span>
+            </span>
+
+            {/* Sync Timestamp */}
+            <div className="hidden sm:flex items-center gap-1.5 text-xs bg-[#F6F9F5] px-3 py-1.5 rounded-full border border-[#E2EBE0] text-slate-500">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wider bg-[#D7F7C4] text-[#133326] rounded-full">
+                <Sparkles className="w-2.5 h-2.5" />
+                Live Sync
+              </span>
+              <span className="text-2xs text-slate-400">Sync:</span>
+              <span className="font-mono text-[#133326] font-bold text-2xs">
                 {lastFetchedAt ? formatDateWIB(lastFetchedAt.toISOString()) : 'Memuat...'}
               </span>
             </div>
 
+            {/* Refresh / Sync Button */}
             <button
               type="button"
               onClick={onRefresh}
               disabled={isRefreshing}
               aria-label="Segarkan data spreadsheet"
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#133326] bg-[#A7E97F] hover:bg-[#95DF69] rounded-full transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-[#133326] bg-[#A7E97F] hover:bg-[#95DF69] rounded-full transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-2xs shrink-0"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${
                   isRefreshing ? 'animate-spin text-[#133326]' : 'text-[#133326]'
                 }`}
               />
-              <span>{isRefreshing ? 'Menyinkronkan...' : 'Refresh'}</span>
+              <span>{isRefreshing ? 'Menyinkronkan...' : 'Sinkronkan Data'}</span>
             </button>
           </div>
         </div>
 
-        {/* Filter bar */}
-        <div className="mt-3.5 pt-3 border-t border-[#ECF2EB] flex flex-wrap items-center justify-between gap-3">
+        {/* Row 2: Filter Bar */}
+        <div className="pt-2.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Interactive Calendar Date Range Picker */}
             <div className="flex items-center gap-1.5 text-xs text-slate-600">
@@ -123,10 +210,18 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Active Range Pill */}
-            <div className="hidden xl:flex items-center gap-1.5 text-2xs bg-[#EAF2E8] text-[#133326] px-3 py-1.5 rounded-full font-mono">
+            <div className="hidden md:flex items-center gap-1.5 text-2xs bg-[#EAF2E8] text-[#133326] px-3 py-1.5 rounded-full font-mono">
               <span>Jangkauan:</span>
               <strong className="text-[#133326]">{activeDateRangeText}</strong>
             </div>
+
+            {/* Total collected days pill */}
+            {availableDates.length > 1 && (
+              <span className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-bold bg-[#F6F9F5] text-[#133326] border border-[#E2EBE0] rounded-full">
+                <Calendar className="w-3 h-3 text-emerald-700" />
+                {availableDates.length} Hari Terkumpul
+              </span>
+            )}
 
             {/* Kanal filter */}
             <div className="flex items-center gap-1.5 text-xs text-slate-600">

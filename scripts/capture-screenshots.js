@@ -93,6 +93,7 @@ async function run() {
     await page.goto(serverUrl, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
     await saveScreenshot(page, 'mobile-390px.png', { fullPage: false });
+    await saveScreenshot(page, 'mobile-fullpage.png', { fullPage: true });
     await context.close();
   }
 
