@@ -70,16 +70,12 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#ECF2EB]">
           {/* Left: Brand Identity + Live Sync & Days Collected Badges */}
           <div className="flex items-center gap-3 min-w-0">
-            {/* Botanical 4-Leaf Clover Emblem */}
-            <div className="w-9 h-9 rounded-2xl bg-[#133326] flex items-center justify-center shadow-sm shrink-0">
-              <svg
-                viewBox="0 0 24 24"
-                className="w-5 h-5 fill-[#A7E97F]"
-                aria-hidden="true"
-              >
-                <path d="M7.5 3C5.01 3 3 5.01 3 7.5C3 9.99 5.01 12 7.5 12H11V7.5C11 5.01 8.99 3 7.5 3ZM16.5 3C14.01 3 13 5.01 13 7.5V12H16.5C18.99 12 21 9.99 21 7.5C21 5.01 18.99 3 16.5 3ZM7.5 13C5.01 13 3 15.01 3 17.5C3 19.99 5.01 22 7.5 22C9.99 22 11 19.99 11 17.5V13H7.5ZM13 13V17.5C13 19.99 15.01 22 16.5 22C18.99 22 21 19.99 21 17.5C21 15.01 18.99 13 16.5 13H13Z" />
-              </svg>
-            </div>
+            {/* ScentPlus Official Clover Emblem */}
+            <img
+              src="/logo.png"
+              alt="SCENTPLUS"
+              className="w-9 h-9 rounded-2xl object-contain shadow-sm shrink-0"
+            />
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
