@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { GoogleSheetsAdsDataSource } from './services/GoogleSheetsAdsDataSource';
+import { SupabaseAdsDataSource } from './services/SupabaseAdsDataSource';
 import { AdsDailyRecord, AdsFilters, DatePreset } from './types/ads';
 import { AdsFetchResult } from './services/AdsDataSource';
 import { calculateKpiMetrics } from './utils/kpiCalculations';
@@ -19,8 +19,8 @@ import { AlertTriangle } from 'lucide-react';
 
 export type MainTab = 'overview' | 'analytics' | 'health';
 
-// Initialize data source instance once outside component render
-const adsDataSource = new GoogleSheetsAdsDataSource('/api/sheets-csv');
+// Initialize Supabase data source instance
+const adsDataSource = new SupabaseAdsDataSource();
 
 export const App: React.FC = () => {
   // Active primary tab: 'overview' | 'analytics' | 'health'
@@ -321,7 +321,7 @@ export const App: React.FC = () => {
             <span>Enterprise Performance Marketing Suite</span>
           </div>
           <div className="flex items-center gap-4 text-2xs text-slate-400">
-            <span>Google Sheets DB ADS Live</span>
+            <span>Supabase DB ADS Live (PostgreSQL)</span>
             <span>&bull;</span>
             <span>Broad Attribution 7-Day</span>
           </div>
